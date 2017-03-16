@@ -11,13 +11,13 @@
     </appender>       
     
      <logger name="ibatisDAO" additivity="false">     
-        <level value ="DEBUG"/>       
+        <level value ="ERROR"/>       
         <appender-ref ref="CONSOLE"/>         
     </logger> 
        
     <!-- 根logger -->
     <root>     
-        <level value ="DEBUG"/> 
+        <level value ="ERROR"/> 
         <appender-ref ref="CONSOLE"/>         
     </root>    
 </log4j:configuration>

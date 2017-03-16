@@ -15,8 +15,10 @@
     http://www.springframework.org/schema/util 
     http://www.springframework.org/schema/util/spring-util-3.2.xsd">
 	<context:component-scan base-package="wang.moshu" />
+	<!-- spring工具类声明（smvc中使用该工具类获取spring对象） -->
+	<bean class="wang.moshu.smvc.framework.util.SpringBeanUtils" />
 	<!-- 引入jdbc配置文件 -->
-	<context:property-placeholder location="classpath:conf/jdbc.properties" />
+	<context:property-placeholder location="classpath:conf/*.properties" />
 
 	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource"
 		destroy-method="close">
@@ -27,6 +29,12 @@
 		<property name="acquireRetryDelay" value="1000"></property>
 		<property name="acquireRetryAttempts" value="60"></property>
 		<property name="breakAfterAcquireFailure" value="false"></property>
+		<!--连接池中保留的最大连接数。默认值: 15 -->
+		<property name="maxPoolSize" value="100" />
+		<!-- 连接池中保留的最小连接数，默认为：3 -->
+		<property name="minPoolSize" value="50" />
+		<!-- 初始化连接池中的连接数，取值应在minPoolSize与maxPoolSize之间，默认为3 -->
+		<property name="initialPoolSize" value="50" />
 	</bean>
 
 	<!-- mybatis文件配置，扫描所有mapper文件 -->
@@ -69,4 +77,18 @@
 			expression="execution(* wang.moshu.service.*.*(..))" />
 		<aop:advisor pointcut-ref="serviceMethod" advice-ref="txAdvice" />
 	</aop:config>
+	
+	
+	<!-- redis工具 -->
+	<bean class="wang.moshu.util.RedisUtil">
+		<property name="maxTotal" value="${redis.init.maxTotal}" />
+		<property name="maxIdle" value="${redis.init.maxIdle}" />
+		<property name="minIdle" value="${redis.init.minIdle}" />
+		<property name="holed" value="${redis.init.maxWaitMillis}" />
+		<property name="port" value="${redis.init.port}" />
+		<property name="host" value="${redis.init.host}" />
+		<property name="timeout" value="${redis.init.timeout}" />
+		<property name="password" value="${redis.init.psw}" />
+		<property name="DB" value="${redis.init.DB}" />
+	</bean>
 </beans>
