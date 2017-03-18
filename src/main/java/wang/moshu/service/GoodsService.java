@@ -29,20 +29,25 @@ public class GoodsService
 		// 先限流
 		goodsBuyCurrentLimiter.doLimit(goodsId, "很遗憾，抢购已经结束了哟");
 
+		// 对于进来的客户做减库存
+		return miaoshaInner(goodsId);
+	}
+
+	private boolean miaoshaInner(Integer goodsId)
+	{
 		Goods goods = goodsMapper.selectByPrimaryKey(goodsId);
 		if (goods == null || goods.getStore().intValue() <= 0)
 		{
 			throw new RuntimeException("很遗憾，抢购已经结束了哟"); // 库存不足，抢购失败
 		}
 		// 做减库存
-
 		int ret = goodsMapper.reduceStore(goods);
 		if (ret > 0)
 		{
 			return true;
 		}
 		// 更新失败，则重新尝试（乐观锁版本号比对，类似java的CAS操作）
-		return miaosha(goodsId);
+		return miaoshaInner(goodsId);
 	}
 
 }

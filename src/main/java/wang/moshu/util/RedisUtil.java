@@ -143,10 +143,11 @@ public class RedisUtil implements InitializingBean
 		config.setMaxTotal(maxTotal);
 		config.setMaxIdle(maxIdle);
 		config.setMinIdle(minIdle);
-		config.setMaxWaitMillis(holed);
-		config.setTestOnBorrow(true);
 
-		pool = new JedisPool(config, host, port, timeout, password);
+		// config.setMaxWaitMillis(holed);
+		// config.setTestOnBorrow(true);
+
+		pool = new JedisPool(config, host, port, timeout, password, DB);
 
 	}
 
@@ -158,7 +159,7 @@ public class RedisUtil implements InitializingBean
 	public Jedis getConnent()
 	{
 		Jedis jedis = pool.getResource();
-		jedis.select(DB);
+		// jedis.select(DB);
 		return jedis;
 	}
 
@@ -263,13 +264,13 @@ public class RedisUtil implements InitializingBean
 	 * @param object 数据
 	 * @return
 	 */
-	public boolean set(String key, Object object, int seconds)
+	public boolean set(String key, String object, int seconds)
 	{
 		Jedis jedis = null;
 		try
 		{
 			jedis = getConnent();
-			jedis.set(key, object.toString());
+			jedis.set(key, object);
 			if (seconds > 0)
 				jedis.expire(key.getBytes(), seconds);
 		}
@@ -321,7 +322,7 @@ public class RedisUtil implements InitializingBean
 	 * @param object 数据
 	 * @return
 	 */
-	public boolean set(String key, Object object)
+	public boolean set(String key, String object)
 	{
 		return set(key, object, -1);
 	}
@@ -774,7 +775,7 @@ public class RedisUtil implements InitializingBean
 	 * @param obj 需要更新的值
 	 * @return 更新结果
 	 */
-	public boolean update(String key, Object obj)
+	public boolean update(String key, String obj)
 	{
 		if (null == get(key))
 		{
