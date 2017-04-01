@@ -65,7 +65,7 @@ public class GoodsServiceTest extends BaseTest
 
 		for (int i = 0; i < 10000; i++)
 		{
-			redisUtil.getForString("ARTICLE_STORE_BY_ID_1_limiter");
+			redisUtil.get("ARTICLE_STORE_BY_ID_1_limiter", Integer.class);
 		}
 
 		System.out.println("耗时：" + (System.currentTimeMillis() - startTime));

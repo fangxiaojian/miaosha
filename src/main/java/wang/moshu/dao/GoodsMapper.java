@@ -1,5 +1,7 @@
 package wang.moshu.dao;
 
+import org.apache.ibatis.annotations.Param;
+
 import wang.moshu.model.Goods;
 
 public interface GoodsMapper
@@ -24,7 +26,7 @@ public interface GoodsMapper
 	 * @param record
 	 * @return
 	 */
-	int reduceStore(Goods record);
+	int reduceStore(@Param("goodsId") Integer goodsId);
 
 	/**
 	 * 根据主键ID查库存

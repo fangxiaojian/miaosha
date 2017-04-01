@@ -30,11 +30,11 @@
 		<property name="acquireRetryAttempts" value="60"></property>
 		<property name="breakAfterAcquireFailure" value="false"></property>
 		<!--连接池中保留的最大连接数。默认值: 15 -->
-		<property name="maxPoolSize" value="100" />
+		<property name="maxPoolSize" value="10" />
 		<!-- 连接池中保留的最小连接数，默认为：3 -->
-		<property name="minPoolSize" value="50" />
+		<property name="minPoolSize" value="0" />
 		<!-- 初始化连接池中的连接数，取值应在minPoolSize与maxPoolSize之间，默认为3 -->
-		<property name="initialPoolSize" value="50" />
+		<property name="initialPoolSize" value="10" />
 	</bean>
 
 	<!-- mybatis文件配置，扫描所有mapper文件 -->
@@ -67,8 +67,8 @@
 				rollback-for="Excepiton" />
 			<tx:method name="*Tran" propagation="REQUIRED"
 				rollback-for="Excepiton" />
-			<tx:method name="miaosha" propagation="REQUIRED" isolation="READ_COMMITTED"
-				rollback-for="Excepiton" />
+			<!-- <tx:method name="reduceStore" propagation="REQUIRED" isolation="READ_COMMITTED" -->
+			<!-- <tx:method name="reduceStore" propagation="REQUIRED" rollback-for="Excepiton" /> -->
 		</tx:attributes>
 	</tx:advice>
 
@@ -77,8 +77,8 @@
 			expression="execution(* wang.moshu.service.*.*(..))" />
 		<aop:advisor pointcut-ref="serviceMethod" advice-ref="txAdvice" />
 	</aop:config>
-	
-	
+
+
 	<!-- redis工具 -->
 	<bean class="wang.moshu.util.RedisUtil">
 		<property name="maxTotal" value="${redis.init.maxTotal}" />
@@ -91,4 +91,7 @@
 		<property name="password" value="${redis.init.psw}" />
 		<property name="DB" value="${redis.init.DB}" />
 	</bean>
+	
+	    <!-- spring工具类声明（smvc中使用该工具类获取spring对象） -->
+	<bean class="wang.moshu.util.SpringBeanUtils"/>
 </beans>

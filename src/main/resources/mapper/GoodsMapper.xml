@@ -96,11 +96,11 @@
     where id = #{id,jdbcType=INTEGER}
   </update>
   <!-- 减库存 -->
-  <update id="reduceStore" parameterType="wang.moshu.model.Goods" >
+  <update id="reduceStore" >
     update goods
     set store = store - 1,
     	version = version+1
-    where id = #{id,jdbcType=INTEGER}
-      and version = #{version,jdbcType=INTEGER}
+    where id = #{goodsId}
+      and store>0
   </update>
 </mapper>

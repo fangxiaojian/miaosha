@@ -79,9 +79,9 @@ public abstract class JsonObjCacheWorker<P, R>
 	 * @param key
 	 * @param dataFromDb
 	 */
-	protected void setCache(int expireSeconds, String key, Object dataFromDb)
+	protected void setCache(int expireSeconds, String key, R dataFromDb)
 	{
-		redisUtil.setForJson(key, dataFromDb, expireSeconds);
+		redisUtil.set(key, dataFromDb, expireSeconds);
 	}
 
 	/**
@@ -93,7 +93,7 @@ public abstract class JsonObjCacheWorker<P, R>
 	protected Object getCache(String key, Class<R> clazz)
 	{
 		// 尝试获取缓存值
-		return redisUtil.getForJson(key, clazz);
+		return redisUtil.get(key, clazz);
 	}
 
 	public void del(P params)

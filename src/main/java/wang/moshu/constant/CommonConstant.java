@@ -11,6 +11,12 @@ public class CommonConstant
 	public interface RedisKey
 	{
 		String GOODS_STORE_BY_ID = "ARTICLE_STORE_BY_ID_{0}";
+
+		// IP黑名单
+		String IP_BLACK_LIST = "IP_BLACK_LIST";
+
+		// 用户黑名单
+		String USER_BLACK_LIST = "USER_BLACK_LIST";
 	}
 
 	public interface RedisKeyExpireSeconds
@@ -28,6 +34,16 @@ public class CommonConstant
 	public interface CurrentLimitMultiple
 	{
 		// 商品购买限流倍数
-		int GOODS_BUY = 2;
+		int GOODS_BUY = 100;
 	}
+
+	/**
+	 * cookie id
+	 */
+	public static final String COOKIE_NAME = "MIAOSHA_ID";
+
+	/**
+	 * cookie过期时间：30年。。。是的，没看错，就是30年
+	 */
+	public static final int COOKIE_EXPIRE_SECONDS = 60 * 60 * 24 * 365 * 30;
 }

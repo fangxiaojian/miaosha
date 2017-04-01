@@ -30,11 +30,10 @@ public abstract class CurrentLimiter<P>
 		String limiterKey = getLimiterName(param) + "_limiter";
 
 		// 现有流量值
-		String currentLimit = redisUtil.getForString(limiterKey);
+		String currentLimit = redisUtil.get(limiterKey);
 
 		// 如果现有流量值大于了限流值，或者自增了流量之后大于了限流值则表示操作收到了限流
-		if ((currentLimit != null && Long.valueOf(currentLimit).intValue() >= limit)
-				|| redisUtil.incr(limiterKey) > limit)
+		if ((currentLimit != null && Long.valueOf(currentLimit) >= limit) || redisUtil.incr(limiterKey) > limit)
 		{
 			throw new RuntimeException(errorMsg);
 		}

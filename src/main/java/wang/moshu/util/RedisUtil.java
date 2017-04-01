@@ -1,6 +1,6 @@
 package wang.moshu.util;
 
-import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -9,9 +9,6 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
-
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONException;
 
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
@@ -144,8 +141,8 @@ public class RedisUtil implements InitializingBean
 		config.setMaxIdle(maxIdle);
 		config.setMinIdle(minIdle);
 
-		// config.setMaxWaitMillis(holed);
-		// config.setTestOnBorrow(true);
+		config.setMaxWaitMillis(holed);
+		config.setTestOnBorrow(true);
 
 		pool = new JedisPool(config, host, port, timeout, password, DB);
 
@@ -161,47 +158,6 @@ public class RedisUtil implements InitializingBean
 		Jedis jedis = pool.getResource();
 		// jedis.select(DB);
 		return jedis;
-	}
-
-	/**
-	 * 向redis中存入数据
-	 * 
-	 * @param key 键值
-	 * @param object 数据
-	 * @return
-	 */
-	public boolean hset(String key, String fieldName, Object object)
-	{
-		return hset(key, fieldName, object, -1);
-	}
-
-	/**
-	 * 向redis中存入数据
-	 * 
-	 * @param key 键值
-	 * @param object 数据
-	 * @return
-	 */
-	public boolean hset(String key, String fieldName, Object object, int seconds)
-	{
-		Jedis jedis = null;
-		try
-		{
-			jedis = getConnent();
-			jedis.hset(key, fieldName, object.toString());
-			if (seconds > 0)
-				jedis.expire(key.getBytes(), seconds);
-		}
-		catch (Exception e)
-		{
-			logger.error("redis hset data failed!", e);
-			return false;
-		}
-		finally
-		{
-			close(jedis);
-		}
-		return true;
 	}
 
 	/**
@@ -237,42 +193,20 @@ public class RedisUtil implements InitializingBean
 	 * @param object 数据
 	 * @return
 	 */
-	public Set<String> mget(Set<String> keys)
+	public <T> boolean set(String key, T object, int seconds)
 	{
 		Jedis jedis = null;
 		try
 		{
 			jedis = getConnent();
-			jedis.mget((String[]) keys.toArray());
-		}
-		catch (Exception e)
-		{
-			logger.error("redis keys failed!", e);
-			return new HashSet<String>();
-		}
-		finally
-		{
-			close(jedis);
-		}
-		return new HashSet<String>();
-	}
-
-	/**
-	 * 向redis中存入数据
-	 * 
-	 * @param key 键值
-	 * @param object 数据
-	 * @return
-	 */
-	public boolean set(String key, String object, int seconds)
-	{
-		Jedis jedis = null;
-		try
-		{
-			jedis = getConnent();
-			jedis.set(key, object);
 			if (seconds > 0)
-				jedis.expire(key.getBytes(), seconds);
+			{
+				jedis.setex(key.getBytes(), seconds, ConvertUtil.serialize(object));
+			}
+			else
+			{
+				jedis.set(key.getBytes(), ConvertUtil.serialize(object));
+			}
 		}
 		catch (Exception e)
 		{
@@ -293,26 +227,9 @@ public class RedisUtil implements InitializingBean
 	 * @param object 数据
 	 * @return
 	 */
-	public boolean setForSerialize(String key, Serializable object, int seconds)
+	public boolean hset(String key, String fieldName, Object object)
 	{
-		Jedis jedis = null;
-		try
-		{
-			jedis = getConnent();
-			jedis.set(key.getBytes(), ConvertUtil.serialize(object));
-			if (seconds > 0)
-				jedis.expire(key.getBytes(), seconds);
-		}
-		catch (Exception e)
-		{
-			logger.error("redis set data failed!", e);
-			return false;
-		}
-		finally
-		{
-			close(jedis);
-		}
-		return true;
+		return hset(key, fieldName, object, -1);
 	}
 
 	/**
@@ -322,39 +239,27 @@ public class RedisUtil implements InitializingBean
 	 * @param object 数据
 	 * @return
 	 */
-	public boolean set(String key, String object)
+	public <T> boolean hset(String key, String fieldName, T object, int seconds)
 	{
-		return set(key, object, -1);
-	}
-
-	/**
-	 * 设定json缓存
-	 * 
-	 * @param key
-	 * @param object
-	 * @return
-	 */
-	public boolean setForJson(String key, Object object, int seconds)
-	{
+		Jedis jedis = null;
 		try
 		{
-			return set(key, JSON.toJSONString(object), seconds);
+			jedis = getConnent();
+			jedis.hset(key.getBytes(), fieldName.getBytes(), ConvertUtil.serialize(object));
+			if (seconds > 0)
+				jedis.expire(key.getBytes(), seconds);
 		}
-		catch (JSONException ex)
+		catch (Exception e)
 		{
+			logger.error("redis hset data failed!", e);
 			return false;
 		}
+		finally
+		{
+			close(jedis);
+		}
+		return true;
 	}
-
-	/*
-	 * public boolean set(String key, String object, int seconds) { Jedis jedis
-	 * = null; try { // byte[] bytes = key.getBytes("ISO8859-1");// //
-	 * ""里面的参数为需要转化的编码，一般是ISO8859-1 // key = new String(bytes, "utf-8");//
-	 * 转化为utf-8编码 jedis = getConnent(); jedis.set(key.getBytes(), object); if
-	 * (seconds > 0) jedis.expire(key, seconds); } catch (Exception e) {
-	 * logger.error("redis set data failed!", e); return false; } finally {
-	 * close(jedis); } return true; }
-	 */
 
 	/**
 	 * 获取数据
@@ -362,14 +267,14 @@ public class RedisUtil implements InitializingBean
 	 * @param key
 	 * @return
 	 */
-	public Object hget(String key, String fieldName)
+	public <T> T hget(String key, String fieldName, Class<T> clazz)
 	{
 		Jedis jedis = null;
 
 		try
 		{
 			jedis = getConnent();
-			return jedis.hget(key, fieldName);
+			return ConvertUtil.unserialize(jedis.hget(key.getBytes(), fieldName.getBytes()), clazz);
 		}
 		catch (Exception e)
 		{
@@ -383,12 +288,24 @@ public class RedisUtil implements InitializingBean
 	}
 
 	/**
+	 * 向redis中存入数据
+	 * 
+	 * @param key 键值
+	 * @param object 数据
+	 * @return
+	 */
+	public <T> boolean set(String key, T object)
+	{
+		return set(key, object, -1);
+	}
+
+	/**
 	 * 获取数据
 	 *
 	 * @param key
 	 * @return
 	 */
-	public Object get(String key)
+	public <T> T get(String key, Class<T> clazz)
 	{
 		Jedis jedis = null;
 
@@ -399,76 +316,7 @@ public class RedisUtil implements InitializingBean
 
 			if (value != null)
 			{
-				return ConvertUtil.unserialize(value);
-			}
-			else
-			{
-				return null;
-			}
-		}
-		catch (Exception e)
-		{
-			logger.error("redis get data failed!", e);
-			return null;
-		}
-		finally
-		{
-			close(jedis);
-		}
-	}
-
-	/**
-	 * 获取数据
-	 *
-	 * @param key
-	 * @return
-	 */
-	public String getForString(String key)
-	{
-		Jedis jedis = null;
-
-		try
-		{
-			jedis = getConnent();
-			String value = jedis.get(key);
-
-			return value;
-		}
-		catch (Exception e)
-		{
-			logger.error("redis get data failed!", e);
-			return null;
-		}
-		finally
-		{
-			close(jedis);
-		}
-	}
-
-	/**
-	 * 获取集合数据(针对序列化JSON)
-	 *
-	 * @param key
-	 * @return
-	 */
-	public List<?> getListForJson(String key, Class<?> clazz)
-	{
-		Jedis jedis = null;
-
-		try
-		{
-			// byte[] bytes = key.getBytes("GBK");//
-			// ""里面的参数为需要转化的编码，一般是ISO8859-1
-			// key = new String(bytes, "utf-8");// 转化为utf-8编码
-			jedis = getConnent();
-			String value = jedis.get(key);
-			if (value != null)
-			{
-				if (logger.isDebugEnabled())
-				{
-					logger.debug("get value from redis: " + value);
-				}
-				return JSON.parseArray(value, clazz);
+				return ConvertUtil.unserialize(value, clazz);
 			}
 			else
 			{
@@ -492,7 +340,7 @@ public class RedisUtil implements InitializingBean
 	 * @param key
 	 * @return
 	 */
-	public Object getForJson(String key, Class<?> clazz)
+	public String get(String key)
 	{
 		Jedis jedis = null;
 
@@ -509,44 +357,7 @@ public class RedisUtil implements InitializingBean
 				{
 					logger.debug("get value from redis: " + value);
 				}
-				return JSON.parseObject(value, clazz);
-			}
-			else
-			{
-				return null;
-			}
-		}
-		catch (Exception e)
-		{
-			logger.error("redis get data failed!", e);
-			return null;
-		}
-		finally
-		{
-			close(jedis);
-		}
-	}
-
-	/**
-	 * 获取数据后自动过期
-	 *
-	 * @param key
-	 * @return
-	 */
-	public Object getAfterExpire(String key)
-	{
-		Jedis jedis = null;
-
-		try
-		{
-			jedis = getConnent();
-			byte[] value = jedis.get(key.getBytes());
-
-			if (value != null)
-			{
-				// 设置过期，立刻过期
-				jedis.expire(key.getBytes(), 0);
-				return ConvertUtil.unserialize(value);
+				return value;
 			}
 			else
 			{
@@ -663,7 +474,7 @@ public class RedisUtil implements InitializingBean
 	 * @param value 键值
 	 * @param second 过期时间(秒)
 	 */
-	public Long lpush(String key, Object value, int second)
+	public <T> Long lpush(String key, T value, int second)
 	{
 		Jedis jedis = null;
 		Long ret = null;
@@ -769,25 +580,6 @@ public class RedisUtil implements InitializingBean
 	}
 
 	/**
-	 * 更新redis数据，当redis中不存在改键值时，返回false
-	 * 
-	 * @param key 键值
-	 * @param obj 需要更新的值
-	 * @return 更新结果
-	 */
-	public boolean update(String key, String obj)
-	{
-		if (null == get(key))
-		{
-			return false;
-		}
-		else
-		{
-			return set(key, obj);
-		}
-	}
-
-	/**
 	 * 关闭当前连接实例，将连接返回连接池
 	 * 
 	 * @param jedis redis连接实例
@@ -808,6 +600,35 @@ public class RedisUtil implements InitializingBean
 	}
 
 	/**
+	 * 从列表中后去元素
+	 * 
+	 * @category @author xiangyong.ding@weimob.com
+	 * @since 2017年3月30日 下午4:12:52
+	 * @param key
+	 * @param clazz
+	 * @return
+	 */
+	public <T> List<T> lrange(String key, int start, int end, Class<T> clazz)
+	{
+		Jedis jedis = null;
+		try
+		{
+			jedis = getConnent();
+			return ConvertUtil.unserialize(jedis.lrange(key.getBytes(), start, end), clazz);
+		}
+		catch (Exception e)
+		{
+			logger.error("redis lrange data failed , key = " + key, e);
+		}
+		finally
+		{
+			close(jedis);
+		}
+
+		return new ArrayList<T>();
+	}
+
+	/**
 	 * 向redis中存入列表
 	 * 
 	 * @param key 键值
@@ -815,7 +636,7 @@ public class RedisUtil implements InitializingBean
 	 * @param seconds 过期时间
 	 * @return
 	 */
-	public boolean lpush(String key, Object object)
+	public <T> boolean lpush(String key, T object)
 	{
 		Long ret = lpush(key, object, 0);
 		if (ret > 0)
@@ -823,42 +644,6 @@ public class RedisUtil implements InitializingBean
 			return true;
 		}
 		return false;
-	}
-
-	/**
-	 * 获取数据
-	 *
-	 * @param key
-	 * @return
-	 */
-	public Object blpop(String key, int waitSeconds)
-	{
-		Jedis jedis = null;
-
-		try
-		{
-			jedis = getConnent();
-			List<byte[]> values = jedis.brpop(waitSeconds, key.getBytes());
-
-			if (values != null && values.size() > 0)
-			{
-				byte[] value = values.get(1);
-				return ConvertUtil.unserialize(value);
-			}
-			else
-			{
-				return null;
-			}
-		}
-		catch (Exception e)
-		{
-			logger.error("redis get data failed!", e);
-			return null;
-		}
-		finally
-		{
-			close(jedis);
-		}
 	}
 
 	/**
@@ -1417,6 +1202,26 @@ public class RedisUtil implements InitializingBean
 	public boolean releaseLock(String key)
 	{
 		return delete(key + "_lock");
+	}
+
+	public Long expire(String key, int seconds)
+	{
+		Jedis jedis = null;
+
+		try
+		{
+			jedis = getConnent();
+			return jedis.expire(key.getBytes(), seconds);
+		}
+		catch (Exception e)
+		{
+			logger.error("redis get data failed!", e);
+			return 0l;
+		}
+		finally
+		{
+			close(jedis);
+		}
 	}
 
 	/**

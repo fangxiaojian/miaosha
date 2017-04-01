@@ -15,15 +15,15 @@ import wang.moshu.dao.GoodsMapper;
  * @author dingxiangyong 2016年8月26日 上午11:17:38
  */
 @Component
-public class GoodsStoreCacheWorker extends JsonObjCacheWorker<Integer, Integer>
+public class GoodsStoreCacheWorker extends JsonObjCacheWorker<Integer, String>
 {
 	@Autowired
 	private GoodsMapper goodsMapper;
 
 	@Override
-	protected Integer getDataWhenNoCache(Integer goodsId)
+	protected String getDataWhenNoCache(Integer goodsId)
 	{
-		return goodsMapper.selectStoreByPrimaryKey(goodsId);
+		return goodsMapper.selectStoreByPrimaryKey(goodsId).toString();
 	}
 
 	@Override

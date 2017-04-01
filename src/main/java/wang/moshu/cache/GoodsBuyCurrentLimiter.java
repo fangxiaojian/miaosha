@@ -31,7 +31,8 @@ public class GoodsBuyCurrentLimiter extends CurrentLimiter<Integer>
 	@Override
 	protected int getLimit(Integer goodsId)
 	{
-		return goodsStoreCacheWorker.get(goodsId, Integer.class) * CommonConstant.CurrentLimitMultiple.GOODS_BUY;
+		return Integer.valueOf(goodsStoreCacheWorker.get(goodsId, String.class))
+				* CommonConstant.CurrentLimitMultiple.GOODS_BUY;
 	}
 
 }

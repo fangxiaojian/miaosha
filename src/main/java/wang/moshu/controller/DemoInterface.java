@@ -1,13 +1,18 @@
 package wang.moshu.controller;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
 import wang.moshu.cache.GoodsBuyCurrentLimiter;
 import wang.moshu.cache.GoodsStoreCacheWorker;
+import wang.moshu.intercept.UserInterceptor;
 import wang.moshu.service.GoodsService;
 import wang.moshu.smvc.framework.annotation.RequestMapping;
 import wang.moshu.smvc.framework.enums.ReturnType;
+import wang.moshu.smvc.framework.interceptor.annotation.Intercept;
 import wang.moshu.smvc.framework.util.Assert;
 import wang.moshu.util.RedisUtil;
 
@@ -34,12 +39,31 @@ public class DemoInterface
 	@Autowired
 	private GoodsStoreCacheWorker goodsStoreCacheWorker;
 
+	@Intercept(value = { UserInterceptor.class })
 	@RequestMapping(value = "miaosha", returnType = ReturnType.JSON)
-	public Boolean miaosha(Integer goodsId)
+	public void miaosha(Integer goodsId)
 	{
 		Assert.notNull(goodsId);
-		return goodsService.miaosha(goodsId);
+		goodsService.miaosha(goodsId);
 	}
+
+	@RequestMapping(value = "miaoshaSql", returnType = ReturnType.JSON)
+	public void miaoshaSql(Integer goodsId)
+	{
+		goodsService.miaoshaSql(goodsId);
+	}
+
+	@RequestMapping(value = "mysqlUpdateBenchMark", returnType = ReturnType.JSON)
+	public void mysqlUpdateBenchMark() throws InterruptedException
+	{
+		goodsService.mysqlUpdateBenchMark();
+	}
+
+	// @RequestMapping(value = "miaosha", returnType = ReturnType.JSON)
+	// public void miaosha()
+	// {
+	// goodsService.miaosha(1);
+	// }
 
 	@RequestMapping(value = "empty", returnType = ReturnType.JSON)
 	public void empty()
@@ -50,20 +74,30 @@ public class DemoInterface
 	@RequestMapping(value = "redis", returnType = ReturnType.JSON)
 	public void redis()
 	{
-		redisUtil.getForString("ARTICLE_STORE_BY_ID_1_limiter");
-		redisUtil.getForString("ARTICLE_STORE_BY_ID_1");
+		redisUtil.get("ARTICLE_STORE_BY_ID_1_limiter", String.class);
+
+		redisUtil.get("ARTICLE_STORE_BY_ID_1", String.class);
+
 	}
 
 	@RequestMapping(value = "cacheWorker", returnType = ReturnType.JSON)
 	public void cacheWorker()
 	{
-		goodsStoreCacheWorker.get(1, Integer.class);
+		goodsStoreCacheWorker.get(1, String.class);
 	}
 
 	@RequestMapping(value = "doLimit", returnType = ReturnType.JSON)
 	public void doLimit()
 	{
 		goodsBuyCurrentLimiter.doLimit(1, "来晚了咯");
+	}
+
+	@RequestMapping(value = "json", returnType = ReturnType.JSON)
+	public Map<String, String> json(String name)
+	{
+		Map<String, String> result = new HashMap<String, String>();
+		result.put("name", name);
+		return result;
 	}
 
 }

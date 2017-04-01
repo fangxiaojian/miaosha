@@ -1,72 +1,82 @@
 package wang.moshu.util;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import io.protostuff.LinkedBuffer;
+import io.protostuff.ProtostuffIOUtil;
+import io.protostuff.Schema;
+import io.protostuff.runtime.RuntimeSchema;
 
 public class ConvertUtil
 {
-	/**
-	 * 日志
-	 */
-	private static final Log LOG = LogFactory.getLog(ConvertUtil.class);
-	
-	/**
-	 * 序列化对象
-	 * 
-	 * @param obj 需要序列化的对象
-	 * @return 字节流
-	 */
-	public static byte[] serialize(Object obj)
-	{
-		ObjectOutputStream os = null;
-		ByteArrayOutputStream bs = null;
-		
-		try {
-			
-			bs = new ByteArrayOutputStream();
-			os = new ObjectOutputStream(bs);
-			
-			os.writeObject(obj);
-			byte[] bytes = bs.toByteArray();
-			
-			return bytes;
-		} 
-		catch (Exception e) 
-		{
-			LOG.error("serialize failed , object = "+obj , e);
-		}
-		
-		return null;
-	}
-	
-	/**
-	 * 反序列化
-	 * 
-	 * @param bytes 字节流
-	 * @return 反序列化后的对象
-	 */
-	public static Object unserialize(byte[] bytes) 
-	{
-		
-		ByteArrayInputStream bais = null;
 
-		try {
-			bais = new ByteArrayInputStream(bytes);
-			ObjectInputStream ois = new ObjectInputStream(bais);
-			
-			return ois.readObject();
-		} 
-		catch (Exception e) 
+	private static Map<Class<?>, Schema<?>> cachedSchema = new ConcurrentHashMap<>();
+
+	@SuppressWarnings("unchecked")
+	private static <T> Schema<T> getSchema(Class<T> cls)
+	{
+		Schema<T> schema = (Schema<T>) cachedSchema.get(cls);
+		if (schema == null)
 		{
-			LOG.error("unserialize failed " , e);
+			schema = RuntimeSchema.createFrom(cls);
+			if (schema != null)
+			{
+				cachedSchema.put(cls, schema);
+			}
 		}
-		
-		return null;
+		return schema;
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <T> byte[] serialize(T obj)
+	{
+		Class<T> cls = (Class<T>) obj.getClass();
+		LinkedBuffer buffer = LinkedBuffer.allocate(LinkedBuffer.DEFAULT_BUFFER_SIZE);
+		try
+		{
+			Schema<T> schema = getSchema(cls);
+			return ProtostuffIOUtil.toByteArray(obj, schema, buffer);
+		}
+		catch (Exception e)
+		{
+			throw new IllegalStateException(e.getMessage(), e);
+		}
+		finally
+		{
+			buffer.clear();
+		}
+	}
+
+	public static <T> T unserialize(byte[] data, Class<T> cls)
+	{
+		if (data == null || data.length == 0)
+		{
+			return null;
+		}
+		try
+		{
+			T message = cls.newInstance();
+			Schema<T> schema = getSchema(cls);
+			ProtostuffIOUtil.mergeFrom(data, message, schema);
+			return message;
+		}
+		catch (Exception e)
+		{
+			throw new IllegalStateException(e.getMessage(), e);
+		}
+	}
+
+	public static <T> List<T> unserialize(List<byte[]> data, Class<T> clazz)
+	{
+		List<T> result = new ArrayList<T>();
+		for (byte[] itemBytes : data)
+		{
+			result.add(unserialize(itemBytes, clazz));
+		}
+		return result;
 	}
 
 }
