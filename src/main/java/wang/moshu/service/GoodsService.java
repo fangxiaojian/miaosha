@@ -8,8 +8,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import wang.moshu.cache.GoodsBuyCurrentLimiter;
+import wang.moshu.cache.MiaoshaSuccessTokenCache;
+import wang.moshu.constant.CommonConstant;
+import wang.moshu.constant.MessageType;
 import wang.moshu.dao.GoodsMapper;
+import wang.moshu.message.Message;
+import wang.moshu.message.MessageTrunk;
 import wang.moshu.model.Goods;
+import wang.moshu.mq.message.MiaoshaRequestMessage;
+import wang.moshu.smvc.framework.exception.BusinessException;
+import wang.moshu.util.RedisUtil;
 
 @Service
 public class GoodsService
@@ -19,6 +27,15 @@ public class GoodsService
 
 	@Autowired
 	private GoodsBuyCurrentLimiter goodsBuyCurrentLimiter;
+	
+	@Autowired
+	private RedisUtil redisUtil;
+	
+	@Autowired
+	private MiaoshaSuccessTokenCache miaoshaSuccessTokenCache;
+	
+	@Autowired
+	private MessageTrunk messageTrunk;
 
 	private static final int TOTAL_OPERATIONS = 100000;
 
@@ -30,11 +47,53 @@ public class GoodsService
 	 * @param goodsId
 	 * @return
 	 */
-	public Boolean miaosha(Integer goodsId)
+	public void miaosha(String mobile, Integer goodsId)
 	{
 		// 先限流
-		goodsBuyCurrentLimiter.doLimit(goodsId, "很遗憾，抢购已经结束了哟");
+		goodsBuyCurrentLimiter.doLimit(goodsId, "啊呀，没挤进去");
 
+		// 判断是否处理中
+		if (redisUtil.hget(CommonConstant.RedisKey.MIAOSHA_HANDLE_LIST + goodsId, mobile, String.class) != null)
+		{
+			throw new BusinessException("您已经提交抢购，正在处理中");
+		}
+
+		// 消息推入队列，结束处理
+		Message<MiaoshaRequestMessage> message = new Message<MiaoshaRequestMessage>(MessageType.MIAOSHA_MESSAGE,
+				new MiaoshaRequestMessage(mobile, goodsId));
+		messageTrunk.put(message);
+
+		// 加入正在处理队列
+		redisUtil.hset(CommonConstant.RedisKey.MIAOSHA_HANDLE_LIST + goodsId, mobile, mobile);
+		
+	}
+
+	/**
+	 * 真正的减库存、下单操作
+	 * @category 真正的减库存、下单操作
+	 * @author xiangyong.ding@weimob.com
+	 * @since 2017年4月12日 下午11:03:04
+	 * @param goodsId
+	 * @return
+	 */
+	public void order(String mobile, Integer goodsId, String token)
+	{
+		//先检查token有效性
+		if(!miaoshaSuccessTokenCache.validateToken(mobile, goodsId, token)){
+			throw new BusinessException("token不对，r u fucking kidding me ?");
+		}
+		
+		// 先检查库存，没有库存直接结束
+		checkStore(goodsId);
+		
+		// 对于进来的客户做减库存+生成订单
+		reduceStore(goodsId);
+		
+		// 
+	}
+	
+	public Boolean doMiaosha(Integer goodsId)
+	{
 		// 先检查库存，没有库存直接结束
 		checkStore(goodsId);
 		// 对于进来的客户做减库存
@@ -51,10 +110,7 @@ public class GoodsService
 	 */
 	public Boolean miaoshaSql(Integer goodsId)
 	{
-		// 先检查库存，没有库存直接结束
-		checkStore(goodsId);
-		// 对于进来的客户做减库存
-		return reduceStore(goodsId);
+		return doMiaosha(goodsId);
 	}
 
 	/**
@@ -69,12 +125,6 @@ public class GoodsService
 	{
 		// 做减库存
 		return goodsMapper.reduceStore(goodsId) > 0;
-		// if (ret > 0)
-		// {
-		// return true;
-		// }
-		// // 更新失败，则重新尝试（乐观锁版本号比对，类似java的CAS操作）
-		// return reduceStore(goodsId);
 	}
 
 	private Goods checkStore(Integer goodsId)

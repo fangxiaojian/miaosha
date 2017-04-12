@@ -25,7 +25,7 @@ public class GoodsServiceTest extends BaseTest
 	@Test
 	public void doMiaosha0()
 	{
-		System.out.print(goodsService.miaosha(1));
+		goodsService.doMiaosha(1);
 	}
 
 	@Test
@@ -83,7 +83,7 @@ public class GoodsServiceTest extends BaseTest
 		@Override
 		public Boolean call() throws Exception
 		{
-			return goodsService.miaosha(miaoShaGoodsId);
+			return goodsService.doMiaosha(miaoShaGoodsId);
 		}
 
 	}

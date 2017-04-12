@@ -334,46 +334,7 @@ public class RedisUtil implements InitializingBean
 		}
 	}
 
-	/**
-	 * 获取数据(针对序列化JSON)
-	 *
-	 * @param key
-	 * @return
-	 */
-	public String get(String key)
-	{
-		Jedis jedis = null;
 
-		try
-		{
-			// byte[] bytes = key.getBytes("GBK");//
-			// ""里面的参数为需要转化的编码，一般是ISO8859-1
-			// key = new String(bytes, "utf-8");// 转化为utf-8编码
-			jedis = getConnent();
-			String value = jedis.get(key);
-			if (value != null)
-			{
-				if (logger.isDebugEnabled())
-				{
-					logger.debug("get value from redis: " + value);
-				}
-				return value;
-			}
-			else
-			{
-				return null;
-			}
-		}
-		catch (Exception e)
-		{
-			logger.error("redis get data failed!", e);
-			return null;
-		}
-		finally
-		{
-			close(jedis);
-		}
-	}
 
 	/**
 	 * 获取key的剩余过期时间，单位：秒
@@ -1282,6 +1243,32 @@ public class RedisUtil implements InitializingBean
 		{
 			jedis = getConnent();
 			return jedis.incr(key);
+		}
+		catch (Exception e)
+		{
+			logger.error("redis get data failed!", e);
+			return 0L;
+		}
+		finally
+		{
+			close(jedis);
+		}
+	}
+	
+	/**
+	 * 自减
+	 * 
+	 * @param key key
+	 * @return 0:失败，非0:成功
+	 */
+	public Long decr(String key)
+	{
+		Jedis jedis = null;
+
+		try
+		{
+			jedis = getConnent();
+			return jedis.decr(key);
 		}
 		catch (Exception e)
 		{

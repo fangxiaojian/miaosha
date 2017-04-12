@@ -1,5 +1,7 @@
 package wang.moshu.dao;
 
+import java.util.List;
+
 import org.apache.ibatis.annotations.Param;
 
 import wang.moshu.model.Goods;
@@ -37,4 +39,6 @@ public interface GoodsMapper
 	 * @return
 	 */
 	Integer selectStoreByPrimaryKey(Integer id);
+	
+	List<Goods> selectAll();
 }

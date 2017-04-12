@@ -17,6 +17,19 @@ public class CommonConstant
 
 		// 用户黑名单
 		String USER_BLACK_LIST = "USER_BLACK_LIST";
+		
+		//秒杀处理列表
+		String MIAOSHA_HANDLE_LIST = "MIAOSHA_HANDLE_LIST_GOODID:{0}";
+		
+		//redis库存
+		String REDIS_GOODS_STORE = "REDIS_GOODS_STORE_GOODSID:{0}";
+		
+		//redis占位成功下单token
+		String MIAOSHA_SUCCESS_TOKEN = "MIAOSHA_SUCCESS_TOKEN_MOBILE:{0}_GOODSID:{1}_";
+		
+		//redis占位成功下单token前缀
+		String MIAOSHA_SUCCESS_TOKEN_PREFIX = "MIAOSHA_SUCCESS_TOKEN_MOBILE";
+		
 	}
 
 	public interface RedisKeyExpireSeconds
@@ -43,7 +56,7 @@ public class CommonConstant
 	public static final String COOKIE_NAME = "MIAOSHA_ID";
 
 	/**
-	 * cookie过期时间：30年。。。是的，没看错，就是30年
+	 * token有效期，单位：毫秒
 	 */
-	public static final int COOKIE_EXPIRE_SECONDS = 60 * 60 * 24 * 365 * 30;
+	public static final long TOKEN_EFECTIVE_MILLISECONDS = 3 * 60 * 1000;
 }

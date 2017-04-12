@@ -17,6 +17,11 @@
     from goods
     where id = #{id,jdbcType=INTEGER}
   </select>
+  <select id="selectAll" resultMap="BaseResultMap" >
+    select 
+    <include refid="Base_Column_List" />
+    from goods
+  </select>
   <select id="selectStoreByPrimaryKey" resultType="java.lang.Integer" parameterType="java.lang.Integer" >
     select store
     from goods

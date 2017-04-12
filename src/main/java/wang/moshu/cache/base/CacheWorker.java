@@ -11,9 +11,9 @@ import wang.moshu.util.RedisUtil;
 /**
  * JSON对象缓存工作器模板 dingxiangyong 2016年6月28日 下午6:07:38
  */
-public abstract class JsonObjCacheWorker<P, R>
+public abstract class CacheWorker<P, R>
 {
-	private static Log logger = LogFactory.getLog(JsonObjCacheWorker.class);
+	private static Log logger = LogFactory.getLog(CacheWorker.class);
 
 	@Autowired
 	protected RedisUtil redisUtil;

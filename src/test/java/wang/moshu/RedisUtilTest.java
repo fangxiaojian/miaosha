@@ -3,6 +3,7 @@ package wang.moshu;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import wang.moshu.mq.message.MiaoshaRequestMessage;
 import wang.moshu.util.RedisUtil;
 
 public class RedisUtilTest extends BaseTest
@@ -15,5 +16,12 @@ public class RedisUtilTest extends BaseTest
 	{
 		redisUtil.set("test_key", "test get and set!!!", 60);
 		System.out.println(redisUtil.get("test_key", String.class));
+		
+		redisUtil.set("test_key", new Integer(10), 60);
+		System.out.println(redisUtil.get("test_key", Integer.class));
+		
+		MiaoshaRequestMessage message = new MiaoshaRequestMessage("17052101388", 1);
+		redisUtil.set("test_key", message, 60);
+		System.out.println(redisUtil.get("test_key", MiaoshaRequestMessage.class));
 	}
 }

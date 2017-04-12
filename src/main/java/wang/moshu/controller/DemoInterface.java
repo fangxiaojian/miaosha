@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
 import wang.moshu.cache.GoodsBuyCurrentLimiter;
-import wang.moshu.cache.GoodsStoreCacheWorker;
+import wang.moshu.cache.MiaoshaSuccessTokenCache;
 import wang.moshu.intercept.UserInterceptor;
 import wang.moshu.service.GoodsService;
 import wang.moshu.smvc.framework.annotation.RequestMapping;
@@ -36,15 +36,20 @@ public class DemoInterface
 	@Autowired
 	private GoodsBuyCurrentLimiter goodsBuyCurrentLimiter;
 
+//	@Autowired
+//	private GoodsStoreCacheWorker goodsStoreCacheWorker;
+	
 	@Autowired
-	private GoodsStoreCacheWorker goodsStoreCacheWorker;
+	private MiaoshaSuccessTokenCache miaoshaSuccessTokenCache;
 
 	@Intercept(value = { UserInterceptor.class })
 	@RequestMapping(value = "miaosha", returnType = ReturnType.JSON)
-	public void miaosha(Integer goodsId)
+	public void miaosha(String mobile, Integer goodsId)
 	{
 		Assert.notNull(goodsId);
-		goodsService.miaosha(goodsId);
+		Assert.notNull(mobile);
+
+		goodsService.miaosha(mobile, goodsId);
 	}
 
 	@RequestMapping(value = "miaoshaSql", returnType = ReturnType.JSON)
@@ -80,11 +85,11 @@ public class DemoInterface
 
 	}
 
-	@RequestMapping(value = "cacheWorker", returnType = ReturnType.JSON)
-	public void cacheWorker()
-	{
-		goodsStoreCacheWorker.get(1, String.class);
-	}
+//	@RequestMapping(value = "cacheWorker", returnType = ReturnType.JSON)
+//	public void cacheWorker()
+//	{
+//		goodsStoreCacheWorker.get(1, Integer.class);
+//	}
 
 	@RequestMapping(value = "doLimit", returnType = ReturnType.JSON)
 	public void doLimit()
@@ -100,4 +105,17 @@ public class DemoInterface
 		return result;
 	}
 
+	/**
+	 * 查询是否秒杀成功
+	 * @category
+	 * @author xiangyong.ding@weimob.com
+	 * @since 2017年4月12日 下午10:55:32
+	 * @param mobile
+	 * @param goodsId
+	 * @return
+	 */
+	public String isMiaoshaSuccess(String mobile, Integer goodsId){
+		// 直接取缓存查询是否有成功的记录生成
+		return miaoshaSuccessTokenCache.genToken(mobile, goodsId);
+	}
 }
