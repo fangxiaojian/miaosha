@@ -1,13 +1,17 @@
 package wang.moshu.service;
 
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import wang.moshu.cache.GoodsBuyCurrentLimiter;
+import wang.moshu.cache.MiaoshaFinishCache;
 import wang.moshu.cache.MiaoshaSuccessTokenCache;
 import wang.moshu.constant.CommonConstant;
 import wang.moshu.constant.MessageType;
@@ -27,15 +31,18 @@ public class GoodsService
 
 	@Autowired
 	private GoodsBuyCurrentLimiter goodsBuyCurrentLimiter;
-	
+
 	@Autowired
 	private RedisUtil redisUtil;
-	
+
 	@Autowired
 	private MiaoshaSuccessTokenCache miaoshaSuccessTokenCache;
-	
+
 	@Autowired
 	private MessageTrunk messageTrunk;
+
+	@Autowired
+	private MiaoshaFinishCache miaoshaFinishCache;
 
 	private static final int TOTAL_OPERATIONS = 100000;
 
@@ -49,6 +56,12 @@ public class GoodsService
 	 */
 	public void miaosha(String mobile, Integer goodsId)
 	{
+		// 先看抢购是否已经结束了
+		if (miaoshaFinishCache.isFinish(goodsId))
+		{
+			throw new BusinessException("您已经提交抢购，正在处理中");
+		}
+
 		// 先限流
 		goodsBuyCurrentLimiter.doLimit(goodsId, "啊呀，没挤进去");
 
@@ -65,11 +78,12 @@ public class GoodsService
 
 		// 加入正在处理队列
 		redisUtil.hset(CommonConstant.RedisKey.MIAOSHA_HANDLE_LIST + goodsId, mobile, mobile);
-		
+
 	}
 
 	/**
 	 * 真正的减库存、下单操作
+	 * 
 	 * @category 真正的减库存、下单操作
 	 * @author xiangyong.ding@weimob.com
 	 * @since 2017年4月12日 下午11:03:04
@@ -78,26 +92,17 @@ public class GoodsService
 	 */
 	public void order(String mobile, Integer goodsId, String token)
 	{
-		//先检查token有效性
-		if(!miaoshaSuccessTokenCache.validateToken(mobile, goodsId, token)){
-			throw new BusinessException("token不对，r u fucking kidding me ?");
+		// 先检查token有效性
+		if (!miaoshaSuccessTokenCache.validateToken(mobile, goodsId, token))
+		{
+			throw new BusinessException("token不对，不能下单哦");
 		}
-		
+
 		// 先检查库存，没有库存直接结束
 		checkStore(goodsId);
-		
+
 		// 对于进来的客户做减库存+生成订单
-		reduceStore(goodsId);
-		
-		// 
-	}
-	
-	public Boolean doMiaosha(Integer goodsId)
-	{
-		// 先检查库存，没有库存直接结束
-		checkStore(goodsId);
-		// 对于进来的客户做减库存
-		return reduceStore(goodsId);
+		reduceStoreAndCreateOrder(mobile, goodsId);
 	}
 
 	/**
@@ -108,23 +113,51 @@ public class GoodsService
 	 * @param goodsId
 	 * @return
 	 */
-	public Boolean miaoshaSql(Integer goodsId)
+	public Boolean miaoshaSql(String mobile, Integer goodsId)
 	{
-		return doMiaosha(goodsId);
+		// 先检查库存，没有库存直接结束
+		checkStore(goodsId);
+		// 对于进来的客户做减库存
+		return reduceStoreAndCreateOrder(mobile, goodsId);
 	}
 
 	/**
-	 * 真正做减库存操作
+	 * 真正做减库存操作(这里没有采用存储过程的原因：这里并没有高并发，高并发已经在获取token时分流，所以此处没必要用存储过程)
 	 * 
 	 * @category 真正做减库存操作
 	 * @author xiangyong.ding@weimob.com
 	 * @since 2017年3月20日 下午2:17:42
 	 * @param goodsId
 	 */
-	private Boolean reduceStore(Integer goodsId)
+	private Boolean reduceStoreAndCreateOrder(String mobile, Integer goodsId)
 	{
-		// 做减库存
-		return goodsMapper.reduceStore(goodsId) > 0;
+		// // 做减库存
+		// if (goodsMapper.reduceStore(goodsId) > 0)
+		// {
+		// return false;
+		// }
+		//
+		// Order order = new Order();
+		// order.setMobile(mobile);
+		// order.setGoodsId(goodsId);
+		// order.setNum(1);// 默认为1，可以优化
+		// orderMapper.insertSelective(order);
+
+		Date orderTime = new Date();
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("goodsId", goodsId);
+		map.put("mobile", mobile);
+		map.put("orderTime", orderTime);
+		// map.put("result", null);
+		goodsMapper.doOrder(map);
+
+		Integer result = (Integer) map.get("result");
+
+		if (result != null && result == 1)
+		{
+			return true;
+		}
+		return false;
 	}
 
 	private Goods checkStore(Integer goodsId)
@@ -132,6 +165,7 @@ public class GoodsService
 		Goods goods = goodsMapper.selectByPrimaryKey(goodsId);
 		if (goods == null || goods.getStore().intValue() <= 0)
 		{
+			miaoshaFinishCache.setFinish(goodsId);
 			throw new RuntimeException("很遗憾，抢购已经结束了哟"); // 库存不足，抢购失败
 		}
 		return goods;

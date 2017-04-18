@@ -6,6 +6,8 @@
     <result column="name" property="name" jdbcType="VARCHAR" />
     <result column="store" property="store" jdbcType="INTEGER" />
     <result column="version" property="version" jdbcType="INTEGER" />
+    <result column="start_time" property="startTime" jdbcType="TIMESTAMP" />
+    <result column="end_time" property="endTime" jdbcType="TIMESTAMP" />
     <result column="del_flag" property="delFlag" jdbcType="BIT" />
   </resultMap>
   <sql id="Base_Column_List" >
@@ -108,4 +110,13 @@
     where id = #{goodsId}
       and store>0
   </update>
+     <!--mybatis调用存储过程-->
+   <select id="doOrder" statementType="CALLABLE">
+       call pro_doorder(
+         #{goodsId,jdbcType=BIGINT,mode=IN},
+         #{mobile,jdbcType=VARCHAR,mode=IN},
+         #{orderTime,jdbcType=TIMESTAMP,mode=IN},
+         #{result,jdbcType=INTEGER,mode=OUT}
+       )
+   </select>
 </mapper>

@@ -36,9 +36,9 @@ public class DemoInterface
 	@Autowired
 	private GoodsBuyCurrentLimiter goodsBuyCurrentLimiter;
 
-//	@Autowired
-//	private GoodsStoreCacheWorker goodsStoreCacheWorker;
-	
+	// @Autowired
+	// private GoodsStoreCacheWorker goodsStoreCacheWorker;
+
 	@Autowired
 	private MiaoshaSuccessTokenCache miaoshaSuccessTokenCache;
 
@@ -53,9 +53,9 @@ public class DemoInterface
 	}
 
 	@RequestMapping(value = "miaoshaSql", returnType = ReturnType.JSON)
-	public void miaoshaSql(Integer goodsId)
+	public void miaoshaSql(String mobile, Integer goodsId)
 	{
-		goodsService.miaoshaSql(goodsId);
+		goodsService.miaoshaSql(mobile, goodsId);
 	}
 
 	@RequestMapping(value = "mysqlUpdateBenchMark", returnType = ReturnType.JSON)
@@ -85,11 +85,11 @@ public class DemoInterface
 
 	}
 
-//	@RequestMapping(value = "cacheWorker", returnType = ReturnType.JSON)
-//	public void cacheWorker()
-//	{
-//		goodsStoreCacheWorker.get(1, Integer.class);
-//	}
+	// @RequestMapping(value = "cacheWorker", returnType = ReturnType.JSON)
+	// public void cacheWorker()
+	// {
+	// goodsStoreCacheWorker.get(1, Integer.class);
+	// }
 
 	@RequestMapping(value = "doLimit", returnType = ReturnType.JSON)
 	public void doLimit()
@@ -107,14 +107,15 @@ public class DemoInterface
 
 	/**
 	 * 查询是否秒杀成功
-	 * @category
-	 * @author xiangyong.ding@weimob.com
+	 * 
+	 * @category @author xiangyong.ding@weimob.com
 	 * @since 2017年4月12日 下午10:55:32
 	 * @param mobile
 	 * @param goodsId
 	 * @return
 	 */
-	public String isMiaoshaSuccess(String mobile, Integer goodsId){
+	public String isMiaoshaSuccess(String mobile, Integer goodsId)
+	{
 		// 直接取缓存查询是否有成功的记录生成
 		return miaoshaSuccessTokenCache.genToken(mobile, goodsId);
 	}

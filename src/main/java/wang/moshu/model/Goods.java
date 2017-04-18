@@ -1,53 +1,91 @@
 package wang.moshu.model;
 
-public class Goods {
-    private Integer id;
+import java.util.Date;
 
-    private String name;
+public class Goods
+{
+	private Integer id;
 
-    private Integer store;
+	private String name;
 
-    private Integer version;
+	private Integer store;
 
-    private Boolean delFlag;
+	private Integer version;
 
-    public Integer getId() {
-        return id;
-    }
+	private Date startTime;
 
-    public void setId(Integer id) {
-        this.id = id;
-    }
+	private Date endTime;
 
-    public String getName() {
-        return name;
-    }
+	private Boolean delFlag;
 
-    public void setName(String name) {
-        this.name = name;
-    }
+	public Integer getId()
+	{
+		return id;
+	}
 
-    public Integer getStore() {
-        return store;
-    }
+	public void setId(Integer id)
+	{
+		this.id = id;
+	}
 
-    public void setStore(Integer store) {
-        this.store = store;
-    }
+	public String getName()
+	{
+		return name;
+	}
 
-    public Integer getVersion() {
-        return version;
-    }
+	public void setName(String name)
+	{
+		this.name = name;
+	}
 
-    public void setVersion(Integer version) {
-        this.version = version;
-    }
+	public Integer getStore()
+	{
+		return store;
+	}
 
-    public Boolean getDelFlag() {
-        return delFlag;
-    }
+	public void setStore(Integer store)
+	{
+		this.store = store;
+	}
 
-    public void setDelFlag(Boolean delFlag) {
-        this.delFlag = delFlag;
-    }
+	public Integer getVersion()
+	{
+		return version;
+	}
+
+	public void setVersion(Integer version)
+	{
+		this.version = version;
+	}
+
+	public Boolean getDelFlag()
+	{
+		return delFlag;
+	}
+
+	public void setDelFlag(Boolean delFlag)
+	{
+		this.delFlag = delFlag;
+	}
+
+	public Date getStartTime()
+	{
+		return startTime;
+	}
+
+	public void setStartTime(Date startTime)
+	{
+		this.startTime = startTime;
+	}
+
+	public Date getEndTime()
+	{
+		return endTime;
+	}
+
+	public void setEndTime(Date endTime)
+	{
+		this.endTime = endTime;
+	}
+
 }

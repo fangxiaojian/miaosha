@@ -10,8 +10,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import wang.moshu.cache.UserBlackListCache;
 import wang.moshu.config.SystemConfig;
-import wang.moshu.constant.CommonConstant;
 import wang.moshu.smvc.framework.exception.BusinessException;
 import wang.moshu.smvc.framework.interceptor.RequestInterceptor;
 import wang.moshu.util.RedisUtil;
@@ -27,6 +27,9 @@ public class UserInterceptor implements RequestInterceptor
 {
 	@Autowired
 	private RedisUtil redisUtil;
+
+	@Autowired
+	private UserBlackListCache userBlackListCache;
 
 	@Autowired
 	private SystemConfig systemConfig;
@@ -51,7 +54,7 @@ public class UserInterceptor implements RequestInterceptor
 		// 匹配手机号是否是正常手机号
 		Matcher matcher = pattern.matcher(mobile);
 		// 2. 验证用户是否在黑名单中
-		if (!matcher.find() || redisUtil.hget(CommonConstant.RedisKey.USER_BLACK_LIST, mobile, String.class) != null)
+		if (!matcher.find() || userBlackListCache.isIn(mobile))
 		{
 			throw new BusinessException("抢购已经结束啦");
 		}
@@ -65,7 +68,7 @@ public class UserInterceptor implements RequestInterceptor
 				- requestRecords.get(requestRecords.size() - 1).timestamp < systemConfig.getUserBlackSeconds() * 1000))
 		{
 			// 模拟加入IP黑名单，实际应用时这里要优化入库，下次重启服务时重新加载
-			redisUtil.hset(CommonConstant.RedisKey.USER_BLACK_LIST, mobile, "");
+			userBlackListCache.addInto(mobile);
 
 			// 清空访问记录缓存
 			redisUtil.delete(USER_REQUEST_TIMES_PREFIX + mobile);

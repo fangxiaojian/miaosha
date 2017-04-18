@@ -17,7 +17,7 @@ import wang.moshu.util.IPUtil;
 import wang.moshu.util.RedisUtil;
 
 /**
- * 恶意IP检测拦截器
+ * 恶意IP检测拦截器（暂时未启用，对于企业网络，很有大的误杀可能，谨慎使用）
  * 
  * @category @author xiangyong.ding@weimob.com
  * @since 2017年3月26日 下午3:41:21

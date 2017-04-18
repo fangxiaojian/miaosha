@@ -1,6 +1,7 @@
 package wang.moshu.dao;
 
 import java.util.List;
+import java.util.Map;
 
 import org.apache.ibatis.annotations.Param;
 
@@ -39,6 +40,16 @@ public interface GoodsMapper
 	 * @return
 	 */
 	Integer selectStoreByPrimaryKey(Integer id);
-	
+
 	List<Goods> selectAll();
+
+	/**
+	 * 减库存+生成订单
+	 * 
+	 * @category @author xiangyong.ding@weimob.com
+	 * @since 2017年3月15日 下午5:03:58
+	 * @param record
+	 * @return
+	 */
+	int doOrder(Map<String, Object> paramMap);
 }

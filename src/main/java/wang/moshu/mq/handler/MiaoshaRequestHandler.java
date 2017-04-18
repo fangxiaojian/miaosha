@@ -4,17 +4,15 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
 
-import wang.moshu.cache.GoodsBuyCurrentLimiter;
 import wang.moshu.cache.GoodsRedisStoreCache;
+import wang.moshu.cache.MiaoshaFinishCache;
 import wang.moshu.cache.MiaoshaSuccessTokenCache;
+import wang.moshu.cache.UserBlackListCache;
 import wang.moshu.constant.MessageType;
 import wang.moshu.message.AbstarctMessageHandler;
 import wang.moshu.mq.message.MiaoshaRequestMessage;
-import wang.moshu.service.GoodsService;
 import wang.moshu.smvc.framework.exception.BusinessException;
-import wang.moshu.util.RedisUtil;
 
 /**
  * DemoMessage消息的处理器
@@ -28,13 +26,16 @@ public class MiaoshaRequestHandler extends AbstarctMessageHandler<MiaoshaRequest
 	private static Log logger = LogFactory.getLog(MiaoshaRequestHandler.class);
 
 	@Autowired
-	private GoodsBuyCurrentLimiter goodsBuyCurrentLimiter;
-
-	@Autowired
 	private GoodsRedisStoreCache goodsRedisStoreCache;
 
 	@Autowired
 	private MiaoshaSuccessTokenCache miaoshaSuccessTokenCache;
+
+	@Autowired
+	private UserBlackListCache userBlackListCache;
+
+	@Autowired
+	private MiaoshaFinishCache miaoshaFinishCache;
 
 	public MiaoshaRequestHandler()
 	{
@@ -47,22 +48,31 @@ public class MiaoshaRequestHandler extends AbstarctMessageHandler<MiaoshaRequest
 	 */
 	public void handle(MiaoshaRequestMessage message)
 	{
+		// 查看请求用户是否在黑名单中
+		if (userBlackListCache.isIn(message.getMobile()))
+		{
+			logger.error(message.getMobile() + "检测为黑名单用户，拒绝抢购");
+			return;
+		}
+
+		// 先看抢购是否已经结束了
+		if (miaoshaFinishCache.isFinish(message.getGoodsId()))
+		{
+			logger.error("抱歉，您来晚了，抢购已经结束了");
+			return;
+		}
+
 		// 先减redis库存
 		if (!goodsRedisStoreCache.decrStore(message.getGoodsId()))
 		{
-
-			// 本次请求处理完成，降低流量值
-			goodsBuyCurrentLimiter.decrCurrentFlow(message.getGoodsId());
 			// 减库存失败
 			throw new BusinessException("占redis名额失败，等待重试");
 		}
 
 		// 减库存成功：生成下单token，并存入redis供前端获取
 		String token = miaoshaSuccessTokenCache.genToken(message.getMobile(), message.getGoodsId());
-		logger.error(message.getMobile()+"获得抢购资格，token："+token);
-		
-		// 本次请求处理完成，降低流量值
-		goodsBuyCurrentLimiter.decrCurrentFlow(message.getGoodsId());
+		logger.error(message.getMobile() + "获得抢购资格，token：" + token);
+
 	}
 
 	public void handleFailed(MiaoshaRequestMessage obj)
