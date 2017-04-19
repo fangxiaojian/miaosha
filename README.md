@@ -1,5 +1,4 @@
 #miaosha
-注意：消息队列使用自己开发的redis消息队列: [https://git.oschina.net/1028125449/message-trunk](https://git.oschina.net/1028125449/message-trunk)，由于该消息队列可能会有更新，暂未上传到maven中央仓库，可以先下载install到本地仓库。
 
 ##项目目标
 小米抢购。并在支撑力上和用户体验上争取超过小米抢购。
