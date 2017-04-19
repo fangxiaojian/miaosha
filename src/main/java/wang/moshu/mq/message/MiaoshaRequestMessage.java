@@ -17,7 +17,7 @@ public class MiaoshaRequestMessage
 	/**
 	 * 秒杀商品编号
 	 */
-	private Integer goodsId;
+	private String goodsRandomName;
 
 	public String getMobile()
 	{
@@ -29,28 +29,26 @@ public class MiaoshaRequestMessage
 		this.mobile = mobile;
 	}
 
-	public Integer getGoodsId()
+	public String getGoodsRandomName()
 	{
-		return goodsId;
+		return goodsRandomName;
 	}
 
-	public void setGoodsId(Integer goodsId)
+	public void setGoodsRandomName(String goodsRandomName)
 	{
-		this.goodsId = goodsId;
+		this.goodsRandomName = goodsRandomName;
 	}
-	
-	
 
 	public MiaoshaRequestMessage()
 	{
 		super();
 	}
 
-	public MiaoshaRequestMessage(String mobile, Integer goodsId)
+	public MiaoshaRequestMessage(String mobile, String goodsRandomName)
 	{
 		super();
 		this.mobile = mobile;
-		this.goodsId = goodsId;
+		this.goodsRandomName = goodsRandomName;
 	}
 
 	@Override
@@ -59,12 +57,10 @@ public class MiaoshaRequestMessage
 		StringBuilder builder = new StringBuilder();
 		builder.append("MiaoshaRequestMessage [mobile=");
 		builder.append(mobile);
-		builder.append(", goodsId=");
-		builder.append(goodsId);
+		builder.append(", goodsRandomName=");
+		builder.append(goodsRandomName);
 		builder.append("]");
 		return builder.toString();
 	}
-
-
 
 }

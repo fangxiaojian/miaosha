@@ -4,6 +4,7 @@
   <resultMap id="BaseResultMap" type="wang.moshu.model.Goods" >
     <id column="id" property="id" jdbcType="INTEGER" />
     <result column="name" property="name" jdbcType="VARCHAR" />
+     <result column="random_name" property="randomName" jdbcType="CHAR" />
     <result column="store" property="store" jdbcType="INTEGER" />
     <result column="version" property="version" jdbcType="INTEGER" />
     <result column="start_time" property="startTime" jdbcType="TIMESTAMP" />
@@ -11,13 +12,19 @@
     <result column="del_flag" property="delFlag" jdbcType="BIT" />
   </resultMap>
   <sql id="Base_Column_List" >
-    id, name, store, version, del_flag
+    id, name, random_name, store, version, del_flag
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
     select 
     <include refid="Base_Column_List" />
     from goods
     where id = #{id,jdbcType=INTEGER}
+  </select>
+  <select id="selectByRandomName" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from goods
+    where random_name = #{randomName,jdbcType=CHAR}
   </select>
   <select id="selectAll" resultMap="BaseResultMap" >
     select 
@@ -48,6 +55,9 @@
       <if test="name != null" >
         name,
       </if>
+      <if test="randomName != null" >
+        random_name,
+      </if>
       <if test="store != null" >
         store,
       </if>
@@ -65,6 +75,9 @@
       <if test="name != null" >
         #{name,jdbcType=VARCHAR},
       </if>
+      <if test="randomName != null" >
+        #{randomName,jdbcType=CHAR},
+      </if>
       <if test="store != null" >
         #{store,jdbcType=INTEGER},
       </if>
@@ -81,6 +94,9 @@
     <set >
       <if test="name != null" >
         name = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="randomName != null" >
+        random_name = #{randomName,jdbcType=VARCHAR},
       </if>
       <if test="store != null" >
         store = #{store,jdbcType=INTEGER},
@@ -111,12 +127,12 @@
       and store>0
   </update>
      <!--mybatis调用存储过程-->
-   <select id="doOrder" statementType="CALLABLE">
+   <select id="doOrder" statementType="CALLABLE" parameterType="java.util.Map">
        call pro_doorder(
          #{goodsId,jdbcType=BIGINT,mode=IN},
          #{mobile,jdbcType=VARCHAR,mode=IN},
          #{orderTime,jdbcType=TIMESTAMP,mode=IN},
-         #{result,jdbcType=INTEGER,mode=OUT}
+         #{o_result,jdbcType=INTEGER,mode=OUT}
        )
    </select>
 </mapper>

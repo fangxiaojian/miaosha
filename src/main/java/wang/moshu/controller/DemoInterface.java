@@ -44,25 +44,26 @@ public class DemoInterface
 
 	@Intercept(value = { UserInterceptor.class })
 	@RequestMapping(value = "miaosha", returnType = ReturnType.JSON)
-	public void miaosha(String mobile, Integer goodsId)
+	public void miaosha(String mobile, String goodsRandomName)
 	{
-		Assert.notNull(goodsId);
+		Assert.notNull(goodsRandomName);
 		Assert.notNull(mobile);
 
-		goodsService.miaosha(mobile, goodsId);
+		goodsService.miaosha(mobile, goodsRandomName);
 	}
 
-	@RequestMapping(value = "miaoshaSql", returnType = ReturnType.JSON)
-	public void miaoshaSql(String mobile, Integer goodsId)
-	{
-		goodsService.miaoshaSql(mobile, goodsId);
-	}
+	// @RequestMapping(value = "miaoshaSql", returnType = ReturnType.JSON)
+	// public void miaoshaSql(String mobile, Integer goodsId)
+	// {
+	// goodsService.miaoshaSql(mobile, goodsId);
+	// }
 
-	@RequestMapping(value = "mysqlUpdateBenchMark", returnType = ReturnType.JSON)
-	public void mysqlUpdateBenchMark() throws InterruptedException
-	{
-		goodsService.mysqlUpdateBenchMark();
-	}
+	// @RequestMapping(value = "mysqlUpdateBenchMark", returnType =
+	// ReturnType.JSON)
+	// public void mysqlUpdateBenchMark() throws InterruptedException
+	// {
+	// goodsService.mysqlUpdateBenchMark();
+	// }
 
 	// @RequestMapping(value = "miaosha", returnType = ReturnType.JSON)
 	// public void miaosha()
@@ -94,7 +95,7 @@ public class DemoInterface
 	@RequestMapping(value = "doLimit", returnType = ReturnType.JSON)
 	public void doLimit()
 	{
-		goodsBuyCurrentLimiter.doLimit(1, "来晚了咯");
+		goodsBuyCurrentLimiter.doLimit("0e67e331-c521-406a-b705-64e557c4c06c", "来晚了咯");
 	}
 
 	@RequestMapping(value = "json", returnType = ReturnType.JSON)
@@ -114,9 +115,10 @@ public class DemoInterface
 	 * @param goodsId
 	 * @return
 	 */
-	public String isMiaoshaSuccess(String mobile, Integer goodsId)
+	@RequestMapping(value = "miaoshaResult", returnType = ReturnType.JSON)
+	public String isMiaoshaSuccess(String mobile, String goodsRandomName)
 	{
 		// 直接取缓存查询是否有成功的记录生成
-		return miaoshaSuccessTokenCache.genToken(mobile, goodsId);
+		return miaoshaSuccessTokenCache.genToken(mobile, goodsRandomName);
 	}
 }

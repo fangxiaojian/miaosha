@@ -28,9 +28,9 @@ public class MiaoshaFinishCache
 	 * @since 2017年4月18日 下午10:26:27
 	 * @param goodsId
 	 */
-	public void setFinish(Integer goodsId)
+	public void setFinish(String goodsRandomName)
 	{
-		redisUtil.set(getKey(goodsId), "");
+		redisUtil.set(getKey(goodsRandomName), "");
 	}
 
 	/**
@@ -42,14 +42,15 @@ public class MiaoshaFinishCache
 	 * @param goodsId
 	 * @return
 	 */
-	public boolean isFinish(Integer goodsId)
+	public boolean isFinish(String goodsRandomName)
 	{
-		return redisUtil.get(getKey(goodsId), String.class) != null;
+		return redisUtil.get(getKey(goodsRandomName), String.class) != null;
 	}
 
-	private String getKey(Integer goodsId)
+	private String getKey(String goodsRandomName)
 	{
-		String key = MessageFormat.format(CommonConstant.RedisKey.MIAOSHA_FINISH_FLAG, new Object[] { goodsId });
+		String key = MessageFormat.format(CommonConstant.RedisKey.MIAOSHA_FINISH_FLAG,
+				new Object[] { goodsRandomName });
 		return key;
 	}
 }

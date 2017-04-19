@@ -12,6 +12,7 @@ import wang.moshu.util.RedisUtil;
 
 /**
  * 秒杀获取到了下单资格token缓存
+ * 
  * @category 秒杀获取到了下单资格token缓存
  * @author xiangyong.ding@weimob.com
  * @since 2017年4月13日 上午12:00:34
@@ -25,9 +26,9 @@ public class MiaoshaSuccessTokenCache
 	@Autowired
 	private GoodsRedisStoreCache goodsRedisStoreCache;
 
-	public String genToken(String mobile, Integer goodsId)
+	public String genToken(String mobile, String goodsRandomName)
 	{
-		String key = getKey(mobile, goodsId);
+		String key = getKey(mobile, goodsRandomName);
 		String token = getToken();
 		redisUtil.set(key + token, System.currentTimeMillis());
 
@@ -42,26 +43,26 @@ public class MiaoshaSuccessTokenCache
 	 * @param token
 	 * @return false:token无效，true:token有效
 	 */
-	public boolean validateToken(String mobile, Integer goodsId, String token)
+	public boolean validateToken(String mobile, String goodsRandomName, String token)
 	{
-		String key = getKey(mobile, goodsId) + token;
+		String key = getKey(mobile, goodsRandomName) + token;
 		Long tokenSavedTimeStamp = redisUtil.get(key, Long.class);
 
 		// 判断token是否过了有效期
 		if (tokenSavedTimeStamp != null
 				&& (System.currentTimeMillis() - tokenSavedTimeStamp < CommonConstant.TOKEN_EFECTIVE_MILLISECONDS))
 		{
-			//已经验证了的清楚掉
+			// 已经验证了的清楚掉
 			redisUtil.delete(key);
 			// 如果token验证成功
 			return true;
 		}
 		else if (tokenSavedTimeStamp != null)
 		{
-			//失效了的清楚掉
+			// 失效了的清楚掉
 			redisUtil.delete(key);
 			// 如果token存在，且是过期的，则回馈redis库存
-			goodsRedisStoreCache.incrStore(goodsId);
+			goodsRedisStoreCache.incrStore(goodsRandomName);
 		}
 
 		return false;
@@ -83,17 +84,17 @@ public class MiaoshaSuccessTokenCache
 		if (tokenSavedTimeStamp != null
 				&& (System.currentTimeMillis() - tokenSavedTimeStamp > CommonConstant.TOKEN_EFECTIVE_MILLISECONDS))
 		{
-			//失效了的清楚掉
+			// 失效了的清楚掉
 			redisUtil.delete(key);
 			// 如果token存在，且是过期的，则回馈redis库存
-			goodsRedisStoreCache.incrStore(Integer.parseInt(key.substring(key.lastIndexOf(":"), key.indexOf("_"))));
+			goodsRedisStoreCache.incrStore(key.substring(key.lastIndexOf(":"), key.lastIndexOf("_")));
 		}
 	}
 
-	protected String getKey(String mobile, Integer goodsId)
+	protected String getKey(String mobile, String goodsRandomName)
 	{
 		String key = MessageFormat.format(CommonConstant.RedisKey.MIAOSHA_SUCCESS_TOKEN,
-				new Object[] { mobile, goodsId });
+				new Object[] { mobile, goodsRandomName });
 		return key;
 	}
 

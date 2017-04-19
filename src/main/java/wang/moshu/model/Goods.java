@@ -8,6 +8,11 @@ public class Goods
 
 	private String name;
 
+	/**
+	 * 随机名称，该名称只有在抢购开始后才生成
+	 */
+	private String randomName;
+
 	private Integer store;
 
 	private Integer version;
@@ -86,6 +91,16 @@ public class Goods
 	public void setEndTime(Date endTime)
 	{
 		this.endTime = endTime;
+	}
+
+	public String getRandomName()
+	{
+		return randomName;
+	}
+
+	public void setRandomName(String randomName)
+	{
+		this.randomName = randomName;
 	}
 
 }

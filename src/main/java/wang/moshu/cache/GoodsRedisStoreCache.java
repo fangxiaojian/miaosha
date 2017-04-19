@@ -23,7 +23,7 @@ public class GoodsRedisStoreCache
 
 	public void doInit(Goods goods)
 	{
-		String key = getKey(goods.getId());
+		String key = getKey(goods.getRandomName());
 		// 如果没有初始化库存则初始化
 		if (!redisUtil.exists(key))
 		{
@@ -33,10 +33,10 @@ public class GoodsRedisStoreCache
 
 	}
 
-	private String getKey(Integer goodsId)
+	private String getKey(String goodsRandomName)
 	{
 		String key = MessageFormat.format(wang.moshu.constant.CommonConstant.RedisKey.REDIS_GOODS_STORE,
-				new Object[] { goodsId });
+				new Object[] { goodsRandomName });
 		return key;
 	}
 
@@ -48,9 +48,9 @@ public class GoodsRedisStoreCache
 	 * @param goodsId
 	 * @return
 	 */
-	public boolean decrStore(Integer goodsId)
+	public boolean decrStore(String goodsRandomName)
 	{
-		String key = getKey(goodsId);
+		String key = getKey(goodsRandomName);
 		// 减redis库存
 		if (redisUtil.decr(key) > 0)
 		{
@@ -73,8 +73,8 @@ public class GoodsRedisStoreCache
 	 * @param goodsId
 	 * @return
 	 */
-	public void incrStore(Integer goodsId)
+	public void incrStore(String goodsRandomName)
 	{
-		redisUtil.incr(getKey(goodsId));
+		redisUtil.incr(getKey(goodsRandomName));
 	}
 }

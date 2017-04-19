@@ -19,7 +19,7 @@ import wang.moshu.message.MessageMonitor;
  * @since 2017年3月16日 下午1:54:05
  */
 @Component
-public class GoodsBuyCurrentLimiter extends CurrentLimiter<Integer>
+public class GoodsBuyCurrentLimiter extends CurrentLimiter<String>
 {
 	@Autowired
 	private GoodsMapper goodsMapper;
@@ -28,16 +28,16 @@ public class GoodsBuyCurrentLimiter extends CurrentLimiter<Integer>
 	private MessageMonitor messageMonitor;
 
 	@Override
-	protected String getLimiterName(Integer goodsId)
+	protected String getLimiterName(String goodsRandomName)
 	{
-		String key = MessageFormat.format(CommonConstant.RedisKey.GOODS_STORE_BY_ID, new Object[] { goodsId });
+		String key = MessageFormat.format(CommonConstant.RedisKey.GOODS_STORE_BY_ID, new Object[] { goodsRandomName });
 		return key;
 	}
 
 	@Override
-	protected int getLimit(Integer goodsId)
+	protected int getLimit(String goodsRandomName)
 	{
-		return Integer.valueOf(goodsMapper.selectStoreByPrimaryKey(goodsId))
+		return goodsMapper.selectByRandomName(goodsRandomName).getStore()
 				* CommonConstant.CurrentLimitMultiple.GOODS_BUY;
 	}
 

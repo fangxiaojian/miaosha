@@ -39,8 +39,8 @@ public class MiaoshaRequestHandler extends AbstarctMessageHandler<MiaoshaRequest
 
 	public MiaoshaRequestHandler()
 	{
-		// 说明该handler监控的消息类型
-		super(MessageType.MIAOSHA_MESSAGE, MiaoshaRequestMessage.class);
+		// 说明该handler监控的消息类型；失败重试次数设定为MAX_VALUE
+		super(MessageType.MIAOSHA_MESSAGE, MiaoshaRequestMessage.class, Integer.MAX_VALUE);
 	}
 
 	/**
@@ -56,21 +56,21 @@ public class MiaoshaRequestHandler extends AbstarctMessageHandler<MiaoshaRequest
 		}
 
 		// 先看抢购是否已经结束了
-		if (miaoshaFinishCache.isFinish(message.getGoodsId()))
+		if (miaoshaFinishCache.isFinish(message.getGoodsRandomName()))
 		{
 			logger.error("抱歉，您来晚了，抢购已经结束了");
 			return;
 		}
 
 		// 先减redis库存
-		if (!goodsRedisStoreCache.decrStore(message.getGoodsId()))
+		if (!goodsRedisStoreCache.decrStore(message.getGoodsRandomName()))
 		{
 			// 减库存失败
 			throw new BusinessException("占redis名额失败，等待重试");
 		}
 
 		// 减库存成功：生成下单token，并存入redis供前端获取
-		String token = miaoshaSuccessTokenCache.genToken(message.getMobile(), message.getGoodsId());
+		String token = miaoshaSuccessTokenCache.genToken(message.getMobile(), message.getGoodsRandomName());
 		logger.error(message.getMobile() + "获得抢购资格，token：" + token);
 
 	}

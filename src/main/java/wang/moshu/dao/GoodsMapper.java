@@ -17,6 +17,8 @@ public interface GoodsMapper
 
 	Goods selectByPrimaryKey(Integer id);
 
+	Goods selectByRandomName(String randomName);
+
 	int updateByPrimaryKeySelective(Goods record);
 
 	int updateByPrimaryKey(Goods record);
@@ -51,5 +53,5 @@ public interface GoodsMapper
 	 * @param record
 	 * @return
 	 */
-	int doOrder(Map<String, Object> paramMap);
+	void doOrder(Map<String, Object> paramMap);
 }

@@ -1,9 +1,15 @@
 package wang.moshu.service;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import wang.moshu.BaseTest;
+import wang.moshu.dao.GoodsMapper;
 import wang.moshu.util.RedisUtil;
 
 public class GoodsServiceTest extends BaseTest
@@ -14,10 +20,21 @@ public class GoodsServiceTest extends BaseTest
 	@Autowired
 	private RedisUtil redisUtil;
 
+	@Autowired
+	private GoodsMapper goodsMapper;
+
+	private static final int TOTAL_OPERATIONS = 100000;
+
 	@Test
 	public void doMiaosha0()
 	{
-		goodsService.miaoshaSql("18052101389", 1);
+		// goodsService.miaoshaSql("18052101389", 1);
+	}
+
+	@Test
+	public void reduceStoreAndCreateOrder()
+	{
+		Assert.assertTrue(goodsService.reduceStoreAndCreateOrder("12052101390", 1));
 	}
 
 	/*
@@ -60,4 +77,42 @@ public class GoodsServiceTest extends BaseTest
 	 * 
 	 * }
 	 */
+
+	/**
+	 * mysql update性能测试
+	 * 
+	 * @category mysql update性能测试
+	 * @author xiangyong.ding@weimob.com
+	 * @since 2017年4月20日 上午12:05:28
+	 * @throws InterruptedException
+	 */
+	@Test
+	public void mysqlUpdateBenchMark() throws InterruptedException
+	{
+		long startTime = System.currentTimeMillis();
+
+		List<Thread> tds = new ArrayList<Thread>();
+		final AtomicInteger ind = new AtomicInteger();
+		for (int i = 0; i < 50; i++)
+		{
+			Thread hj = new Thread(new Runnable()
+			{
+				public void run()
+				{
+					for (int i = 0; (i = ind.getAndIncrement()) < TOTAL_OPERATIONS;)
+					{
+						goodsMapper.reduceStore(1);
+					}
+				}
+			});
+			tds.add(hj);
+			hj.start();
+		}
+
+		for (Thread t : tds)
+			t.join();
+
+		long elapsed = System.currentTimeMillis() - startTime;
+		System.out.println(((1000 * TOTAL_OPERATIONS) / elapsed) + " ops");
+	}
 }
