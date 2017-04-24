@@ -107,6 +107,20 @@ public class DemoInterface
 	}
 
 	/**
+	 * 获取秒杀商品的链接
+	 * 
+	 * @category @author xiangyong.ding@weimob.com
+	 * @since 2017年4月24日 下午12:47:40
+	 * @param goodsId
+	 * @return
+	 */
+	@RequestMapping(value = "getMiaoshaGoodsLink", returnType = ReturnType.JSON)
+	public String getMiaoshaGoodsLink(Integer goodsId)
+	{
+		return goodsService.getGoodsRandomName(goodsId);
+	}
+
+	/**
 	 * 查询是否秒杀成功
 	 * 
 	 * @category @author xiangyong.ding@weimob.com

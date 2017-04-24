@@ -10,9 +10,9 @@ public class CommonConstant
 {
 	public interface RedisKey
 	{
-		String GOODS_STORE_BY_ID = "GOODS_STORE_BY_GOODS_RANDOM_NAME_{0}";
+		String GOODS_STORE_BY_ID = "GOODS_STORE_BY_GOODS_ID_{0}";
 
-		String GOODS_INFO_BY_ID = "GOODS_INFO_BY_GOODS_RANDOM_NAME_{0}";
+		String GOODS_INFO_BY_ID = "GOODS_INFO_BY_GOODS_ID_{0}";
 
 		// IP黑名单
 		String IP_BLACK_LIST = "IP_BLACK_LIST";

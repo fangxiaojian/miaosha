@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -43,6 +44,28 @@ public class GoodsService
 
 	@Autowired
 	private GoodsInfoCacheWorker goodsInfoCacheWorker;
+
+	/**
+	 * 根据goodsid获取随机名称(这样确保前端用户不能提前知道秒杀链接，降低被刷风险)
+	 * 
+	 * @category 根据goodsid获取随机名称
+	 * @author xiangyong.ding@weimob.com
+	 * @since 2017年4月24日 下午12:38:06
+	 * @param goodsId
+	 */
+	public String getGoodsRandomName(Integer goodsId)
+	{
+		Goods goods = goodsInfoCacheWorker.get(goodsId, Goods.class);
+		long now = System.currentTimeMillis();
+
+		// 已经开始了活动，则输出抢购链接
+		if (goods.getStartTime().getTime() < now && now < goods.getEndTime().getTime())
+		{
+			return goods.getRandomName();
+		}
+
+		return StringUtils.EMPTY;
+	}
 
 	/**
 	 * 做秒杀操作

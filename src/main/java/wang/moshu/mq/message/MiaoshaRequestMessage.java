@@ -1,5 +1,7 @@
 package wang.moshu.mq.message;
 
+import java.io.Serializable;
+
 /**
  * 秒杀请求消息
  * 
@@ -7,8 +9,13 @@ package wang.moshu.mq.message;
  * @author xiangyong.ding@weimob.com
  * @since 2017年4月7日 下午5:34:13
  */
-public class MiaoshaRequestMessage
+public class MiaoshaRequestMessage implements Serializable
 {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 5810025604361901986L;
+
 	/**
 	 * 手机号，标识用户唯一身份
 	 */
@@ -18,6 +25,18 @@ public class MiaoshaRequestMessage
 	 * 秒杀商品编号
 	 */
 	private String goodsRandomName;
+
+	public MiaoshaRequestMessage()
+	{
+		super();
+	}
+
+	public MiaoshaRequestMessage(String mobile, String goodsRandomName)
+	{
+		super();
+		this.mobile = mobile;
+		this.goodsRandomName = goodsRandomName;
+	}
 
 	public String getMobile()
 	{
@@ -36,18 +55,6 @@ public class MiaoshaRequestMessage
 
 	public void setGoodsRandomName(String goodsRandomName)
 	{
-		this.goodsRandomName = goodsRandomName;
-	}
-
-	public MiaoshaRequestMessage()
-	{
-		super();
-	}
-
-	public MiaoshaRequestMessage(String mobile, String goodsRandomName)
-	{
-		super();
-		this.mobile = mobile;
 		this.goodsRandomName = goodsRandomName;
 	}
 
