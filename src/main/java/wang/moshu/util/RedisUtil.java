@@ -142,7 +142,7 @@ public class RedisUtil implements InitializingBean
 		config.setMinIdle(minIdle);
 
 		config.setMaxWaitMillis(holed);
-		config.setTestOnBorrow(true);
+		config.setTestOnBorrow(false);
 
 		pool = new JedisPool(config, host, port, timeout, password, DB);
 
@@ -262,6 +262,33 @@ public class RedisUtil implements InitializingBean
 	}
 
 	/**
+	 * 向redis中存入数据
+	 * 
+	 * @param key 键值
+	 * @param object 数据
+	 * @return
+	 */
+	public <T> boolean hdel(String key, String fieldName)
+	{
+		Jedis jedis = null;
+		try
+		{
+			jedis = getConnent();
+			jedis.hdel(key.getBytes(), fieldName.getBytes());
+		}
+		catch (Exception e)
+		{
+			logger.error("redis hset data failed!", e);
+			return false;
+		}
+		finally
+		{
+			close(jedis);
+		}
+		return true;
+	}
+
+	/**
 	 * 获取数据
 	 *
 	 * @param key
@@ -333,8 +360,6 @@ public class RedisUtil implements InitializingBean
 			close(jedis);
 		}
 	}
-
-
 
 	/**
 	 * 获取key的剩余过期时间，单位：秒
@@ -1254,7 +1279,7 @@ public class RedisUtil implements InitializingBean
 			close(jedis);
 		}
 	}
-	
+
 	/**
 	 * 自减
 	 * 

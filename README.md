@@ -34,3 +34,10 @@
 
 ###3. 防刷过滤器+redis+消息队列+更新数据库
 针对第2方案中可能出现被辅助软件而已刷单的现象，可以增加过滤器：如果用户在指定时间内请求多少次，则认为是恶意用户，可以直接将该用户加入黑名单，并在后续的消息队列处理中不给黑名单的用户分配资格。
+
+
+##相关接口
+查询秒杀商品真实链接：http://localhost:8080/miaosha/i/getMiaoshaGoodsLink?goodsId=1
+秒杀接口：http://localhost:8080/miaosha/i/miaosha?mobile=17502507402&goodsRandomName=0e67e331-c521-406a-b705-64e557c4c06c
+查询秒杀结果：http://localhost:8080/miaosha/i/miaoshaResult?mobile=17502507402&goodsRandomName=0e67e331-c521-406a-b705-64e557c4c06c
+下单接口：http://localhost:8080/miaosha/i/order?mobile=17502507402&goodsId=1&token=08ccec88-b62d-449d-9bba-0f36716c2749

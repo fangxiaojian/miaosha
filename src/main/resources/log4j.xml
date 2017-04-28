@@ -8,11 +8,11 @@
             <param name="ConversionPattern"        
                 value="[%d{yyyy-MM-dd HH:mm:ss,SSS\}] [%-5p] %m - (%c at:line %L)%n"/>     
         </layout>          
-    </appender>       
+    </appender>  
        
     <!-- 根logger -->
     <root>     
-        <level value ="DEBUG"/> 
+        <level value ="ERROR"/> 
         <appender-ref ref="CONSOLE"/>         
     </root>    
 </log4j:configuration>

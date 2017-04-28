@@ -1,8 +1,6 @@
 package wang.moshu.intercept;
 
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -37,7 +35,8 @@ public class UserInterceptor implements RequestInterceptor
 	private static final String USER_REQUEST_TIMES_PREFIX = "user_request_times_";
 
 	// 手机号正则表达式
-	private static Pattern pattern = Pattern.compile("^1[3|4|5|7|8][0-9]{9}$");
+	// private static Pattern pattern =
+	// Pattern.compile("^1[3|4|5|7|8][0-9]{9}$");
 
 	@Override
 	public String description()
@@ -52,9 +51,15 @@ public class UserInterceptor implements RequestInterceptor
 		String mobile = request.getParameter("mobile");
 
 		// 匹配手机号是否是正常手机号
-		Matcher matcher = pattern.matcher(mobile);
+		// Matcher matcher = pattern.matcher(mobile);
+		// // 2. 验证用户是否在黑名单中
+		// if (!matcher.find() || userBlackListCache.isIn(mobile))
+		// {
+		// throw new BusinessException("抢购已经结束啦");
+		// }
+
 		// 2. 验证用户是否在黑名单中
-		if (!matcher.find() || userBlackListCache.isIn(mobile))
+		if (userBlackListCache.isIn(mobile))
 		{
 			throw new BusinessException("抢购已经结束啦");
 		}

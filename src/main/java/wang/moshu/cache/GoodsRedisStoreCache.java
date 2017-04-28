@@ -28,7 +28,7 @@ public class GoodsRedisStoreCache
 		if (!redisUtil.exists(key))
 		{
 			// TODO 这里考虑可以把redis库存设定大一点，这样即使用户占位成功，下单也要及时
-			redisUtil.set(key, goods.getStore() * 2);
+			redisUtil.set(key, goods.getStore() * 1);
 		}
 
 	}

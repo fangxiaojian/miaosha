@@ -33,6 +33,19 @@ public class MiaoshaHandlingListCache
 	}
 
 	/**
+	 * 增加到处理列表
+	 * 
+	 * @category @author xiangyong.ding@weimob.com
+	 * @since 2017年4月19日 下午11:59:35
+	 * @param mobile
+	 * @param goodsRandomName
+	 */
+	public void removeFromHanleList(String mobile, String goodsRandomName)
+	{
+		redisUtil.hdel(getKey(goodsRandomName), mobile);
+	}
+
+	/**
 	 * 是否在正在处理列表中
 	 * 
 	 * @category 是否在正在处理列表中

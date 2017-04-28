@@ -14,8 +14,8 @@ import wang.moshu.message.AbstarctMessageHandler;
 import wang.moshu.mq.message.MiaoshaRequestMessage;
 import wang.moshu.smvc.framework.exception.BusinessException;
 
-/**
- * DemoMessage消息的处理器
+/*****
+ * DemoMessage消息的处理器******
  * 
  * @category @author xiangyong.ding@weimob.com
  * @since 2017年2月3日 下午9:21:41
@@ -48,6 +48,7 @@ public class MiaoshaRequestHandler extends AbstarctMessageHandler<MiaoshaRequest
 	 */
 	public void handle(MiaoshaRequestMessage message)
 	{
+		long startTime = System.currentTimeMillis();
 		// 查看请求用户是否在黑名单中
 		if (userBlackListCache.isIn(message.getMobile()))
 		{
@@ -71,7 +72,8 @@ public class MiaoshaRequestHandler extends AbstarctMessageHandler<MiaoshaRequest
 
 		// 减库存成功：生成下单token，并存入redis供前端获取
 		String token = miaoshaSuccessTokenCache.genToken(message.getMobile(), message.getGoodsRandomName());
-		logger.error(message.getMobile() + "获得抢购资格，token：" + token);
+		logger.error(new StringBuilder(message.getMobile()).append("获得抢购资格，token：").append(token).append("，耗时：")
+				.append(System.currentTimeMillis() - startTime));
 
 	}
 

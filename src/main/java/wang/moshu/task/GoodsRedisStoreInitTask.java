@@ -22,6 +22,7 @@ public class GoodsRedisStoreInitTask
 	@Autowired
 	private GoodsMapper goodsMapper;
 
+	@Autowired
 	private GoodsRedisStoreCache goodsRedisStore;
 
 	/**
@@ -37,7 +38,5 @@ public class GoodsRedisStoreInitTask
 
 		}
 	}
-
-
 
 }

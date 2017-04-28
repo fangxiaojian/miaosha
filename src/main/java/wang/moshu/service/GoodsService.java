@@ -77,28 +77,27 @@ public class GoodsService
 	 */
 	public void miaosha(String mobile, String goodsRandomName)
 	{
-		// 先看抢购是否已经结束了
-		if (miaoshaFinishCache.isFinish(goodsRandomName))
-		{
-			throw new BusinessException("您已经提交抢购，正在处理中");
-		}
-
-		// 先限流
-		goodsBuyCurrentLimiter.doLimit(goodsRandomName, "啊呀，没挤进去");
-
-		// 判断是否处理中(是否在处理列表中)
-		if (miaoshaHandlingListCache.isInHanleList(mobile, goodsRandomName))
-		{
-			throw new BusinessException("您已经提交抢购，正在处理中");
-		}
+		// // 先看抢购是否已经结束了
+		// if (miaoshaFinishCache.isFinish(goodsRandomName))
+		// {
+		// throw new BusinessException("您已经提交抢购，正在处理中");
+		// }
+		//
+		// // 先限流
+		// goodsBuyCurrentLimiter.doLimit(goodsRandomName, "啊呀，没挤进去");
+		//
+		// // 判断是否处理中(是否在处理列表中)
+		// if (miaoshaHandlingListCache.isInHanleList(mobile, goodsRandomName))
+		// {
+		// throw new BusinessException("您已经提交抢购，正在处理中");
+		// }
 
 		// 请求消息推入处理队列，结束
-		Message<MiaoshaRequestMessage> message = new Message<MiaoshaRequestMessage>(MessageType.MIAOSHA_MESSAGE,
-				new MiaoshaRequestMessage(mobile, goodsRandomName));
+		Message message = new Message(MessageType.MIAOSHA_MESSAGE, new MiaoshaRequestMessage(mobile, goodsRandomName));
 		messageTrunk.put(message);
 
-		// 加入正在处理列表
-		miaoshaHandlingListCache.add2HanleList(mobile, goodsRandomName);
+		// // 加入正在处理列表
+		// miaoshaHandlingListCache.add2HanleList(mobile, goodsRandomName);
 
 	}
 
@@ -137,7 +136,7 @@ public class GoodsService
 	 * @since 2017年3月20日 下午2:17:42
 	 * @param goodsId
 	 */
-	public Boolean reduceStoreAndCreateOrder(String mobile, Integer goodsId)
+	public Integer reduceStoreAndCreateOrder(String mobile, Integer goodsId)
 	{
 		Date orderTime = new Date();
 		Map<String, Object> map = new HashMap<String, Object>();
@@ -145,15 +144,17 @@ public class GoodsService
 		map.put("mobile", mobile);
 		map.put("orderTime", orderTime);
 		map.put("o_result", -2);
+		map.put("o_order_id", -1);
 		goodsMapper.doOrder(map);
 
 		Integer result = (Integer) map.get("o_result");
 
 		if (result != null && result == 1)
 		{
-			return true;
+			return (Integer) map.get("o_order_id");
+
 		}
-		return false;
+		throw new BusinessException("下单失败，来晚了");
 	}
 
 	/**
@@ -165,7 +166,7 @@ public class GoodsService
 	 * @param goodsId
 	 * @return
 	 */
-	public void order(String mobile, Integer goodsId, String token)
+	public Integer order(String mobile, Integer goodsId, String token)
 	{
 		// 先检查token有效性
 		Goods goodsInfo = goodsInfoCacheWorker.get(goodsId, Goods.class);
@@ -178,7 +179,7 @@ public class GoodsService
 		checkStore(goodsInfo.getRandomName());
 
 		// 对于进来的客户做减库存+生成订单
-		reduceStoreAndCreateOrder(mobile, goodsId);
+		return reduceStoreAndCreateOrder(mobile, goodsId);
 	}
 
 }

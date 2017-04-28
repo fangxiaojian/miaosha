@@ -34,7 +34,7 @@ public class GoodsServiceTest extends BaseTest
 	@Test
 	public void reduceStoreAndCreateOrder()
 	{
-		Assert.assertTrue(goodsService.reduceStoreAndCreateOrder("12052101390", 1));
+		Assert.assertNotNull(goodsService.reduceStoreAndCreateOrder("12052101390", 1));
 	}
 
 	/*

@@ -8,13 +8,14 @@ import org.springframework.stereotype.Controller;
 
 import wang.moshu.cache.GoodsBuyCurrentLimiter;
 import wang.moshu.cache.MiaoshaSuccessTokenCache;
-import wang.moshu.intercept.UserInterceptor;
+import wang.moshu.constant.MessageType;
+import wang.moshu.message.Message;
+import wang.moshu.message.RedisUtil;
+import wang.moshu.mq.message.MiaoshaRequestMessage;
 import wang.moshu.service.GoodsService;
 import wang.moshu.smvc.framework.annotation.RequestMapping;
 import wang.moshu.smvc.framework.enums.ReturnType;
-import wang.moshu.smvc.framework.interceptor.annotation.Intercept;
 import wang.moshu.smvc.framework.util.Assert;
-import wang.moshu.util.RedisUtil;
 
 /**
  * 接口路由
@@ -34,6 +35,9 @@ public class DemoInterface
 	private RedisUtil redisUtil;
 
 	@Autowired
+	private wang.moshu.util.RedisUtil redisUtil2;
+
+	@Autowired
 	private GoodsBuyCurrentLimiter goodsBuyCurrentLimiter;
 
 	// @Autowired
@@ -42,15 +46,46 @@ public class DemoInterface
 	@Autowired
 	private MiaoshaSuccessTokenCache miaoshaSuccessTokenCache;
 
-	@Intercept(value = { UserInterceptor.class })
+	// @Autowired
+	// private MiaoshaRequestHandler miaoshaRequestHandler;
+
+	// @Intercept(value = { UserInterceptor.class })
+	// @Intercept(value = { ExecuteTimeInterceptor.class })
 	@RequestMapping(value = "miaosha", returnType = ReturnType.JSON)
-	public void miaosha(String mobile, String goodsRandomName)
+	public String miaosha(String mobile, String goodsRandomName)
 	{
 		Assert.notNull(goodsRandomName);
 		Assert.notNull(mobile);
 
 		goodsService.miaosha(mobile, goodsRandomName);
+
+		// 为什么要返回mobile，为了方便jmeter测试
+		return mobile;
 	}
+
+	/**
+	 * 秒杀-不走消息队列
+	 * 
+	 * @category 秒杀-不走消息队列
+	 * @author xiangyong.ding@weimob.com
+	 * @since 2017年4月26日 下午11:44:51
+	 * @param mobile
+	 * @param goodsRandomName
+	 * @return
+	 */
+	// @Intercept(value = { ExecuteTimeInterceptor.class })
+	// @RequestMapping(value = "miaoshaD", returnType = ReturnType.JSON)
+	// public String miaoshaD(String mobile, String goodsRandomName)
+	// {
+	// Assert.notNull(goodsRandomName);
+	// Assert.notNull(mobile);
+	//
+	// miaoshaRequestHandler.handle(new MiaoshaRequestMessage(mobile,
+	// goodsRandomName));
+	//
+	// // 为什么要返回mobile，为了方便jmeter测试
+	// return mobile;
+	// }
 
 	// @RequestMapping(value = "miaoshaSql", returnType = ReturnType.JSON)
 	// public void miaoshaSql(String mobile, Integer goodsId)
@@ -80,10 +115,31 @@ public class DemoInterface
 	@RequestMapping(value = "redis", returnType = ReturnType.JSON)
 	public void redis()
 	{
-		redisUtil.get("ARTICLE_STORE_BY_ID_1_limiter", String.class);
+		// redisUtil.get("REDIS_GOODS_STORE_GOODS_RANDOM_NAME:0e67e331-c521-406a-b705-64e557c4c06c",
+		// String.class);
+		Message message = new Message(MessageType.MIAOSHA_MESSAGE,
+				new MiaoshaRequestMessage("232323232332", "0e67e331-c521-406a-b705-64e557c4c06c"));
+		redisUtil.rpush(message.getKey().toString(), message, 0);
+		// redisUtil.get("ARTICLE_STORE_BY_ID_1", String.class);
 
-		redisUtil.get("ARTICLE_STORE_BY_ID_1", String.class);
+	}
 
+	@RequestMapping(value = "redis2", returnType = ReturnType.JSON)
+	public void redis2()
+	{
+		// redisUtil.get("REDIS_GOODS_STORE_GOODS_RANDOM_NAME:0e67e331-c521-406a-b705-64e557c4c06c",
+		// String.class);
+		Message message = new Message(MessageType.MIAOSHA_MESSAGE,
+				new MiaoshaRequestMessage("232323232332", "0e67e331-c521-406a-b705-64e557c4c06c"));
+		redisUtil2.lpush(message.getKey().toString(), message, 0);
+		// redisUtil.get("ARTICLE_STORE_BY_ID_1", String.class);
+
+	}
+
+	@RequestMapping(value = "redis3", returnType = ReturnType.JSON)
+	public void redis3()
+	{
+		redisUtil2.set("ddddddddd", "dssssssssss");
 	}
 
 	// @RequestMapping(value = "cacheWorker", returnType = ReturnType.JSON)
@@ -134,5 +190,21 @@ public class DemoInterface
 	{
 		// 直接取缓存查询是否有成功的记录生成
 		return miaoshaSuccessTokenCache.genToken(mobile, goodsRandomName);
+	}
+
+	/**
+	 * 下单
+	 * 
+	 * @category 下单
+	 * @author xiangyong.ding@weimob.com
+	 * @since 2017年4月25日 上午12:35:34
+	 * @param mobile
+	 * @param goodsId
+	 * @param token
+	 */
+	@RequestMapping(value = "order", returnType = ReturnType.JSON)
+	public Integer order(String mobile, Integer goodsId, String token)
+	{
+		return goodsService.order(mobile, goodsId, token);
 	}
 }

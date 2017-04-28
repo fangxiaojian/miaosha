@@ -26,12 +26,15 @@ public class MiaoshaSuccessTokenCache
 	@Autowired
 	private GoodsRedisStoreCache goodsRedisStoreCache;
 
+	@Autowired
+	private MiaoshaHandlingListCache miaoshaHandlingListCache;
+
 	public String genToken(String mobile, String goodsRandomName)
 	{
 		String key = getKey(mobile, goodsRandomName);
 		String token = getToken();
 		redisUtil.set(key + token, System.currentTimeMillis());
-
+		// redisUtil.incr("test_ddd");
 		return token;
 	}
 
@@ -63,6 +66,8 @@ public class MiaoshaSuccessTokenCache
 			redisUtil.delete(key);
 			// 如果token存在，且是过期的，则回馈redis库存
 			goodsRedisStoreCache.incrStore(goodsRandomName);
+
+			miaoshaHandlingListCache.removeFromHanleList(mobile, goodsRandomName);
 		}
 
 		return false;

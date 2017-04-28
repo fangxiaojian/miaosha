@@ -132,7 +132,9 @@
          #{goodsId,jdbcType=BIGINT,mode=IN},
          #{mobile,jdbcType=VARCHAR,mode=IN},
          #{orderTime,jdbcType=TIMESTAMP,mode=IN},
-         #{o_result,jdbcType=INTEGER,mode=OUT}
+         #{o_result,jdbcType=INTEGER,mode=OUT},
+         #{o_order_id,jdbcType=INTEGER,mode=OUT}
+         
        )
    </select>
 </mapper>
