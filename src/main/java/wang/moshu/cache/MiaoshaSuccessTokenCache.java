@@ -4,8 +4,10 @@ import java.text.MessageFormat;
 import java.util.Set;
 import java.util.UUID;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import wang.moshu.constant.CommonConstant;
 import wang.moshu.util.RedisUtil;
@@ -36,6 +38,28 @@ public class MiaoshaSuccessTokenCache
 		redisUtil.set(key + token, System.currentTimeMillis());
 		// redisUtil.incr("test_ddd");
 		return token;
+	}
+
+	/**
+	 * 查询token
+	 * 
+	 * @category 查询token
+	 * @author xiangyong.ding@weimob.com
+	 * @since 2017年5月1日 下午10:41:23
+	 * @param mobile
+	 * @param goodsRandomName
+	 * @return
+	 */
+	public String queryToken(String mobile, String goodsRandomName)
+	{
+		Set<String> keys = redisUtil.keys(getKey(mobile, goodsRandomName) + "*");
+		if (!CollectionUtils.isEmpty(keys))
+		{
+			String key = keys.iterator().next();
+
+			return key.substring(key.lastIndexOf("_") + 1);
+		}
+		return StringUtils.EMPTY;
 	}
 
 	/**

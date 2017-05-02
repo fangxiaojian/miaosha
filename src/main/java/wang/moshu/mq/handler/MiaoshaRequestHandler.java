@@ -72,6 +72,7 @@ public class MiaoshaRequestHandler extends AbstarctMessageHandler<MiaoshaRequest
 
 		// 减库存成功：生成下单token，并存入redis供前端获取
 		String token = miaoshaSuccessTokenCache.genToken(message.getMobile(), message.getGoodsRandomName());
+
 		logger.error(new StringBuilder(message.getMobile()).append("获得抢购资格，token：").append(token).append("，耗时：")
 				.append(System.currentTimeMillis() - startTime));
 

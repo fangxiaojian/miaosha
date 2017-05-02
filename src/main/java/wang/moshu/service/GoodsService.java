@@ -2,6 +2,7 @@ package wang.moshu.service;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
@@ -68,6 +69,33 @@ public class GoodsService
 	}
 
 	/**
+	 * 获取抢购商品列表
+	 * 
+	 * @category 获取抢购商品列表
+	 * @author xiangyong.ding@weimob.com
+	 * @since 2017年5月1日 下午9:40:50
+	 * @return
+	 */
+	public List<Goods> getGoodsList()
+	{
+		return goodsMapper.selectAll();
+	}
+
+	/**
+	 * 获取商品详情
+	 * 
+	 * @category 获取商品详情
+	 * @author xiangyong.ding@weimob.com
+	 * @since 2017年5月1日 下午9:59:21
+	 * @param goodsId
+	 * @return
+	 */
+	public Goods getDetail(Integer goodsId)
+	{
+		return goodsMapper.selectByPrimaryKey(goodsId);
+	}
+
+	/**
 	 * 做秒杀操作
 	 * 
 	 * @category @author xiangyong.ding@weimob.com
@@ -77,45 +105,29 @@ public class GoodsService
 	 */
 	public void miaosha(String mobile, String goodsRandomName)
 	{
-		// // 先看抢购是否已经结束了
-		// if (miaoshaFinishCache.isFinish(goodsRandomName))
-		// {
-		// throw new BusinessException("您已经提交抢购，正在处理中");
-		// }
-		//
-		// // 先限流
-		// goodsBuyCurrentLimiter.doLimit(goodsRandomName, "啊呀，没挤进去");
-		//
-		// // 判断是否处理中(是否在处理列表中)
-		// if (miaoshaHandlingListCache.isInHanleList(mobile, goodsRandomName))
-		// {
-		// throw new BusinessException("您已经提交抢购，正在处理中");
-		// }
+		// 先看抢购是否已经结束了
+		if (miaoshaFinishCache.isFinish(goodsRandomName))
+		{
+			throw new BusinessException("您已经提交抢购，正在处理中");
+		}
+
+		// 先限流
+		goodsBuyCurrentLimiter.doLimit(goodsRandomName, "啊呀，没挤进去");
+
+		// 判断是否处理中(是否在处理列表中)
+		if (miaoshaHandlingListCache.isInHanleList(mobile, goodsRandomName))
+		{
+			throw new BusinessException("您已经提交过抢购，如果抢购成功请下单，否则耐心等待哦...");
+		}
 
 		// 请求消息推入处理队列，结束
 		Message message = new Message(MessageType.MIAOSHA_MESSAGE, new MiaoshaRequestMessage(mobile, goodsRandomName));
 		messageTrunk.put(message);
 
-		// // 加入正在处理列表
-		// miaoshaHandlingListCache.add2HanleList(mobile, goodsRandomName);
+		// 加入正在处理列表
+		miaoshaHandlingListCache.add2HanleList(mobile, goodsRandomName);
 
 	}
-
-	// /**
-	// * 做秒杀操作（直接用sql）
-	// *
-	// * @category @author xiangyong.ding@weimob.com
-	// * @since 2017年3月15日 下午5:11:02
-	// * @param goodsId
-	// * @return
-	// */
-	// public Boolean miaoshaSql(String mobile, Integer goodsId)
-	// {
-	// // 先检查库存，没有库存直接结束
-	// checkStore(goodsId);
-	// // 对于进来的客户做减库存
-	// return reduceStoreAndCreateOrder(mobile, goodsId);
-	// }
 
 	private Goods checkStore(String goodsRandomName)
 	{
