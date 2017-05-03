@@ -52,7 +52,7 @@ public class CommonConstant
 	public interface CurrentLimitMultiple
 	{
 		// 商品购买限流倍数
-		int GOODS_BUY = 10;
+		int GOODS_BUY = 1;
 	}
 
 	/**

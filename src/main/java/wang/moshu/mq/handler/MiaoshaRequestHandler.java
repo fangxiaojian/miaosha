@@ -14,8 +14,8 @@ import wang.moshu.message.AbstarctMessageHandler;
 import wang.moshu.mq.message.MiaoshaRequestMessage;
 import wang.moshu.smvc.framework.exception.BusinessException;
 
-/*****
- * DemoMessage消息的处理器******
+/*******
+ * DemoMessage消息的处理器**********
  * 
  * @category @author xiangyong.ding@weimob.com
  * @since 2017年2月3日 下午9:21:41
@@ -48,33 +48,41 @@ public class MiaoshaRequestHandler extends AbstarctMessageHandler<MiaoshaRequest
 	 */
 	public void handle(MiaoshaRequestMessage message)
 	{
-		long startTime = System.currentTimeMillis();
+		long startTimeN = System.currentTimeMillis();
+		long startTime1 = System.currentTimeMillis();
 		// 查看请求用户是否在黑名单中
 		if (userBlackListCache.isIn(message.getMobile()))
 		{
 			logger.error(message.getMobile() + "检测为黑名单用户，拒绝抢购");
 			return;
 		}
-
+		// logger.error("1耗时：" + (System.currentTimeMillis() - startTime));
+		long startTime2 = System.currentTimeMillis();
 		// 先看抢购是否已经结束了
 		if (miaoshaFinishCache.isFinish(message.getGoodsRandomName()))
 		{
 			logger.error("抱歉，您来晚了，抢购已经结束了");
 			return;
 		}
-
+		// logger.error("2耗时：" + (System.currentTimeMillis() - startTime));
+		long startTime3 = System.currentTimeMillis();
 		// 先减redis库存
 		if (!goodsRedisStoreCache.decrStore(message.getGoodsRandomName()))
 		{
 			// 减库存失败
 			throw new BusinessException("占redis名额失败，等待重试");
 		}
-
+		// logger.error("3耗时：" + (System.currentTimeMillis() - startTime));
+		long startTime4 = System.currentTimeMillis();
 		// 减库存成功：生成下单token，并存入redis供前端获取
 		String token = miaoshaSuccessTokenCache.genToken(message.getMobile(), message.getGoodsRandomName());
-
-		logger.error(new StringBuilder(message.getMobile()).append("获得抢购资格，token：").append(token).append("，耗时：")
-				.append(System.currentTimeMillis() - startTime));
+		// logger.error("4耗时：" + (System.currentTimeMillis() - startTime));
+		long startTime5 = System.currentTimeMillis();
+		StringBuilder sb = new StringBuilder();
+		sb.append("step1:").append(startTime2 - startTime1).append("step2:").append(startTime3 - startTime2)
+				.append("step3:").append(startTime4 - startTime3).append("step4:").append(startTime5 - startTime4)
+				.append("all:").append(startTime5 - startTime1).append(",token:").append(token);
+		logger.error(sb.toString());
 
 	}
 

@@ -156,7 +156,6 @@ public class RedisUtil implements InitializingBean
 	public Jedis getConnent()
 	{
 		Jedis jedis = pool.getResource();
-		// jedis.select(DB);
 		return jedis;
 	}
 
