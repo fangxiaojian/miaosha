@@ -15,6 +15,11 @@
 
 ##实现结构
 恶意请求过滤-->限流-->redis消息队列执行占位操作，获得下单token-->用户传入token下单
+如下为抢购流程：
+![输入图片说明](https://git.oschina.net/uploads/images/2017/0504/004233_4a6509ef_50648.png "在这里输入图片标题")
+![输入图片说明](https://git.oschina.net/uploads/images/2017/0504/004247_f310a750_50648.png "在这里输入图片标题")
+![输入图片说明](https://git.oschina.net/uploads/images/2017/0504/004256_770ffe62_50648.png "在这里输入图片标题")
+![输入图片说明](https://git.oschina.net/uploads/images/2017/0504/004305_c8d7558e_50648.png "在这里输入图片标题")
 
 ##请求过滤
 1. 入口只有活动开启前才能获得
