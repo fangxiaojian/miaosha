@@ -56,8 +56,7 @@ public class MiaoshaHandlingListCache
 	 */
 	public boolean isInHanleList(String mobile, String goodsRandomName)
 	{
-		return redisUtil.hget(CommonConstant.RedisKey.MIAOSHA_HANDLE_LIST + goodsRandomName, mobile,
-				String.class) != null;
+		return redisUtil.hget(getKey(goodsRandomName), mobile, String.class) != null;
 	}
 
 	private String getKey(String goodsRandomName)
