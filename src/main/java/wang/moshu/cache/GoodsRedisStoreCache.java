@@ -52,7 +52,7 @@ public class GoodsRedisStoreCache
 	{
 		String key = getKey(goodsRandomName);
 		// 减redis库存
-		if (redisUtil.decr(key) > 0)
+		if (redisUtil.decr(key) >= 0)
 		{
 			// 如果减成功
 			return true;
