@@ -39,7 +39,7 @@ public class CommonConstant
 
 	public interface RedisKeyExpireSeconds
 	{
-		int GOODS_STORE_BY_ID = 3 * 24 * 60 * 60;
+		int GOODS_STORE_BY_ID = 3 * 24 * 60 * 60; // 3天
 	}
 
 	/**

@@ -27,7 +27,7 @@ public class MiaoshaHandlingListCache
 	 * @param mobile
 	 * @param goodsRandomName
 	 */
-	public void add2HanleList(String mobile, String goodsRandomName)
+	public void addHanleList(String mobile, String goodsRandomName)
 	{
 		redisUtil.hset(getKey(goodsRandomName), mobile, mobile);
 	}

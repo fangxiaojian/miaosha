@@ -115,7 +115,7 @@ var goods = {
                     var inputPhone = $('#killPhoneKey').val();
                     console.log("inputPhone: " + inputPhone);
                     if (goods.validatePhone(inputPhone)) {
-                        //电话写入cookie(7天过期)
+                        //电话写入cookie(7天过期) 创建一个仅对 path 路径页面有效的 cookie ，cookie 的有效期为 7 天
                         $.cookie('killPhone', inputPhone, {expires: 7, path: '/miaosha'});
                         //验证通过　　刷新页面
                         window.location.reload();
@@ -231,6 +231,7 @@ var goods = {
 
     },
 
+	//倒计时
     countDown: function (goodsId, nowTime, startTime, endTime) {
         console.log(goodsId + '_' + nowTime + '_' + startTime + '_' + endTime);
         var goodsBox = $('#goods-box');

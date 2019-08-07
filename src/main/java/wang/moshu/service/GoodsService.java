@@ -62,7 +62,7 @@ public class GoodsService
 		// 已经开始了活动，则输出抢购链接
 		if (goods.getStartTime().getTime() < now && now < goods.getEndTime().getTime())
 		{
-			return goods.getRandomName();
+			return goods.getRandomName(); //0e67e331-c521-406a-b705-64e557c4c06c
 		}
 
 		return StringUtils.EMPTY;
@@ -100,7 +100,7 @@ public class GoodsService
 	 * 
 	 * @category @author xiangyong.ding@weimob.com
 	 * @since 2017年3月15日 下午5:11:02
-	 * @param goodsId
+	 * @param goodsRandomName
 	 * @return
 	 */
 	public void miaosha(String mobile, String goodsRandomName)
@@ -125,7 +125,7 @@ public class GoodsService
 		messageTrunk.put(message);
 
 		// 加入正在处理列表
-		miaoshaHandlingListCache.add2HanleList(mobile, goodsRandomName);
+		miaoshaHandlingListCache.addHanleList(mobile, goodsRandomName);
 
 	}
 

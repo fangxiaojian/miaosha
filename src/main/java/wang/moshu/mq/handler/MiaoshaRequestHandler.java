@@ -79,9 +79,9 @@ public class MiaoshaRequestHandler extends AbstarctMessageHandler<MiaoshaRequest
 		// logger.error("4耗时：" + (System.currentTimeMillis() - startTime));
 		long startTime5 = System.currentTimeMillis();
 		StringBuilder sb = new StringBuilder();
-		sb.append("step1:").append(startTime2 - startTime1).append("step2:").append(startTime3 - startTime2)
-				.append("step3:").append(startTime4 - startTime3).append("step4:").append(startTime5 - startTime4)
-				.append("all:").append(startTime5 - startTime1).append(",token:").append(token);
+		sb.append("step1:").append(startTime2 - startTime1).append("，step2:").append(startTime3 - startTime2)
+				.append("，step3:").append(startTime4 - startTime3).append("，step4:").append(startTime5 - startTime4)
+				.append("，all:").append(startTime5 - startTime1).append(",token:").append(token);
 		logger.error(sb.toString());
 
 	}

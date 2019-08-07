@@ -30,6 +30,7 @@ public class MiaoshaPage
 	@RequestMapping(value = "{goodsId}/detail")
 	public String detail(Integer goodsId, Map<String, Object> returnMap)
 	{
+		//Assert 翻译为中文为“断言”，它断定某一个实际的运行值和预期想一样，否则就抛出异常。
 		Assert.notNull(goodsId);
 
 		Goods goods = goodsService.getDetail(goodsId);

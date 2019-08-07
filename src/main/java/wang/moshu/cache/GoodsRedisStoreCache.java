@@ -45,7 +45,7 @@ public class GoodsRedisStoreCache
 	 * 
 	 * @category @author xiangyong.ding@weimob.com
 	 * @since 2017年4月9日 下午12:11:47
-	 * @param goodsId
+	 * @param goodsRandomName
 	 * @return
 	 */
 	public boolean decrStore(String goodsRandomName)
@@ -70,7 +70,7 @@ public class GoodsRedisStoreCache
 	 * @category 加redis库存
 	 * @author xiangyong.ding@weimob.com
 	 * @since 2017年4月9日 下午12:11:47
-	 * @param goodsId
+	 * @param goodsRandomName
 	 * @return
 	 */
 	public void incrStore(String goodsRandomName)

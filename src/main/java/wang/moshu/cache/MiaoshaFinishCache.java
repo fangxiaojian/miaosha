@@ -39,11 +39,12 @@ public class MiaoshaFinishCache
 	 * @category 指定商品秒杀是否结束
 	 * @author xiangyong.ding@weimob.com
 	 * @since 2017年4月18日 下午10:31:01
-	 * @param goodsId
+	 * @param goodsRandomName
 	 * @return
 	 */
 	public boolean isFinish(String goodsRandomName)
 	{
+		System.out.println(redisUtil.get(getKey(goodsRandomName), String.class));
 		return redisUtil.get(getKey(goodsRandomName), String.class) != null;
 	}
 

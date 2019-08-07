@@ -1,0 +1,10 @@
+@startuml
+用户 -> MiaoshaInterface: order 下单
+MiaoshaInterface --> GoodsService: goodsService.order(mobile, goodsId, token);
+GoodsService --> GoodsService : 获取商品信息
+GoodsService --> MiaoshaSuccessTokenCache : 判断token的有效性，是否正确与是否过期 \n 过期Redis库存+1，并清除用户在处理队列中的缓存\n 用户可以重新下单
+GoodsService --> GoodsService : 检查商品库存 查询DB数据库的库存使用读写锁 \n 若<=0则将商品randomName添加到Redis中 \n 即商品秒杀已结束
+GoodsService --> GoodsService : 减库存+生成订单 使用读写锁ReentrantReadWriteLock
+GoodsService --> MiaoshaInterface : 返回订单号
+用户 <- MiaoshaInterface: 返回订单号
+@enduml

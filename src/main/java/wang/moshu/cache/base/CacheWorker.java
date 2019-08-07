@@ -54,7 +54,7 @@ public abstract class CacheWorker<P, R>
 			logger.debug(sb.toString());
 		}
 
-		// 否则去DB中取
+		// 否则去DB中取 根据商品id获取商品信息
 		R dataFromDb = getDataWhenNoCache(params);
 		// 回写cache
 		if (dataFromDb != null)

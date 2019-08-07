@@ -1,0 +1,12 @@
+@startuml
+MiaoshaInterface -> MiaoshaInterface : 判断传入的商品randomName和手机号是否为null
+MiaoshaInterface -> GoodsService : goodsService.miaosha(mobile, goodsRandomName);
+GoodsService -> MiaoshaFinishCache : 1.miaoshaFinishCache.isFinish(goodsRandomName) \n 判断秒杀是否结束，通过Redis中的缓存是否为null来判断
+GoodsService -> GoodsBuyCurrentLimiter : 2.限流 goodsBuyCurrentLimiter.doLimit(goodsRandomName, "没抢到，请重试");
+GoodsBuyCurrentLimiter -> GoodsBuyCurrentLimiter : Redis缓存中消息对列待处理的个数为当前流量 \n 与该商品的库存的倍数(这里是1倍)为最大流量作对比
+GoodsService -> MiaoshaHandlingListCache : 3.是否在处理列表中 miaoshaHandlingListCache.isInHanleList(mobile, goodsRandomName)
+MiaoshaHandlingListCache -> MiaoshaHandlingListCache : Redis中以 唯一标识:+商品randomName 为key \n 手机号为value
+GoodsService -> Message : 4.请求封装到消息类中 new Message(MessageType.MIAOSHA_MESSAGE, new MiaoshaRequestMessage(mobile, goodsRandomName));
+GoodsService -> MessageTrunk : 5.消息加入处理队列 put(Message message) Redis中的key为 MIAOSHA_MESSAGE
+GoodsService -> MiaoshaHandlingListCache : 6.加入处理列表 进行削峰 miaoshaHandlingListCache.addHanleList(mobile, goodsRandomName); Redis中的key 为MIAOSHA_HANDLE_LIST+randomName
+@enduml

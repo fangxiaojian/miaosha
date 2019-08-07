@@ -116,7 +116,7 @@ public class MiaoshaSuccessTokenCache
 			// 失效了的清楚掉
 			redisUtil.delete(key);
 			// 如果token存在，且是过期的，则回馈redis库存
-			goodsRedisStoreCache.incrStore(key.substring(key.lastIndexOf(":"), key.lastIndexOf("_")));
+			goodsRedisStoreCache.incrStore(key.substring(key.lastIndexOf(":")+1, key.lastIndexOf("_")));
 		}
 	}
 

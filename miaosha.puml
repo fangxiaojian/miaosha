@@ -1,0 +1,51 @@
+@startuml
+       GoodsRedisStoreInitTask -> GoodsRedisStoreInitTask : (定时器) 初始化商品库存
+       GoodsTokenExpireClearTask -> GoodsTokenExpireClearTask : (定时器) 定时清理过期的订单token
+       detail.jsp -> detail.jsp: 验证手机号码格式
+       detail.jsp --> MiaoshaInterface: 获取系统当前时间 time()
+       detail.jsp <-- MiaoshaInterface: 返回系统时间
+       detail.jsp -> detail.jsp: 1秒杀结束、2倒计时、3开始秒杀
+       detail.jsp --> MiaoshaInterface: 获取商品秒杀链接 getMiaoshaGoodsLink(goodsId)
+       MiaoshaInterface -> goodsInfoCacheWorker : 先从缓存获取，缓存没有再从数据库获取再存到缓存
+       MiaoshaInterface <- goodsInfoCacheWorker : 返回商品信息
+       detail.jsp <-- MiaoshaInterface: 返回秒杀链接
+
+       detail.jsp --> MiaoshaInterface: 开始秒杀 miaosha(mobile, goodsRandomName)
+       MiaoshaInterface -> MiaoshaInterface : UserInterceptor 用户拦截器，通过Redis缓存判断用户每秒请求个数，将恶意用户加入黑名单或IP黑名单Redis缓存 \n 否则添加到Redis缓存中
+       MiaoshaInterface -> miaoshaFinishCache : 判断秒杀是否结束 isFinish(goodsRandomName)，通过判断缓存中秒杀标准是否为空
+       MiaoshaInterface -> goodsBuyCurrentLimiter :doLimit()限流，最大值，redis的列表 lien 命令
+       MiaoshaInterface -> miaoshaHandingListCache :isInHanleList：判断是否已经在处理中，防止重复提交，redis 的hash结构 hget命令
+       MiaoshaInterface -> messageTrunk : 加入消息处理列表 mq 中，削峰。redis的消息队列运用
+
+       group 消息对列（异步）
+           messageTrunk -> MiaoshaRequest : MQ.handle()处理消息
+           MiaoshaRequest -> MiaoshaRequest : 判断是否在黑名单userBlackListCache，hget命令
+           miaoshaFinishCache <- MiaoshaRequest : 判断抢购是否已经结束
+           MiaoshaRequest -> goodsRedisStoreCache : 减库存操作decrStore() 。decr(key) 保证公共资源并发问题
+           MiaoshaRequest -> miaoshaSuccessTokenCache :生成token，和用户key并关联到redis
+       end
+
+       MiaoshaInterface -> miaoshaHandingListCache : 添加到处理列表addHanleList() 。redis 的hset 命令
+       detail.jsp -> detail.jsp: 定时器轮训查询秒杀结果
+       detail.jsp --> MiaoshaInterface:查询秒杀结果 miaoshaResult()
+       MiaoshaInterface -> miaoshaSuccessTokenCache : queryToken() 。通过 keys 命令查询有没key前缀的
+       MiaoshaInterface <- miaoshaSuccessTokenCache : 成功的话返回秒杀的token
+       detail.jsp <-- MiaoshaInterface: 返回token
+       detail.jsp -> detail.jsp: 停止查询定时任务
+
+
+       detail.jsp --> MiaoshaInterface: 下单order(token,mobile,goodsId)
+       MiaoshaInterface -> GoodsService : 真正的减库存、下单操作
+       goodsInfoCacheWorker <- GoodsService : 获取商品信息
+       miaoshaSuccessTokenCache <- GoodsService : validateToken() 校验 token的时效性
+       miaoshaSuccessTokenCache -> miaoshaSuccessTokenCache : 如果通过就删除token，（一次性使用，防止重复下单）
+       miaoshaSuccessTokenCache -> miaoshaSuccessTokenCache : 如果不成功
+       goodsRedisStoreCache <- miaoshaSuccessTokenCache : 1、token过期，incrStore() 回馈库存
+       miaoshaHandingListCache <- miaoshaSuccessTokenCache : 2、从待处理队列中删除用户，用户又可以重新下单了
+       GoodsService <- GoodsService :再次检查库存信息
+       miaoshaFinishCache <- GoodsService : 如果库存已等于0，设置秒杀结束缓存。
+       GoodsService <- GoodsService : 真正数据库下单doOrder()
+       MiaoshaInterface <- GoodsService : 返回订单号id
+       detail.jsp <-- MiaoshaInterface : 返回点单号id
+       detail.jsp -> detail.jsp : 显示秒杀下单结果
+@enduml

@@ -22,7 +22,7 @@
 		<!-- 线程池维护线程所允许的空闲时间 -->
 		<property name="keepAliveSeconds" value="30000" />
 		<!-- 线程池维护线程的最大数量 -->
-		<property name="maxPoolSize" value="300" />
+		<property name="maxPoolSize" value="400" />
 		<!-- 线程池所使用的缓冲队列 -->
 		<property name="queueCapacity" value="2000" />
 	</bean>

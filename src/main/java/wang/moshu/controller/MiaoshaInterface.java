@@ -5,6 +5,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import wang.moshu.cache.MiaoshaSuccessTokenCache;
+import wang.moshu.intercept.IPInterceptor;
 import wang.moshu.intercept.UserInterceptor;
 import wang.moshu.service.GoodsService;
 import wang.moshu.smvc.framework.annotation.RequestMapping;
@@ -73,7 +74,7 @@ public class MiaoshaInterface
 	 * @category @author xiangyong.ding@weimob.com
 	 * @since 2017年4月12日 下午10:55:32
 	 * @param mobile
-	 * @param goodsId
+	 * @param goodsRandomName
 	 * @return
 	 */
 	@RequestMapping(value = "miaoshaResult", returnType = ReturnType.JSON)

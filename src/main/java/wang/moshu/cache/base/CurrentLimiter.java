@@ -20,13 +20,13 @@ public abstract class CurrentLimiter<P>
 	 * 
 	 * @category @author xiangyong.ding@weimob.com
 	 * @since 2017年3月16日 下午1:51:38
-	 * @param id
+	 * @param goodsRandomName
 	 * @param errorMsg
 	 */
-	public void doLimit(P param, String errorMsg)
+	public void doLimit(P goodsRandomName, String errorMsg)
 	{
 		// 获取流量最大值
-		int limit = getLimit(param);
+		int limit = getLimit(goodsRandomName);
 
 		// 现有流量值
 		Integer currentLimit = getCurrentLimit();
